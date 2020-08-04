@@ -2,12 +2,12 @@ library scroll_navigation;
 
 import 'package:flutter/material.dart';
 
-///Es una navegación que permitirá desplazarte de derecha a izquierda con gestos
-///y también al presionar un elemento del Nav Item.
+/// It is a navigation that will allow you to scroll from right to left with gestures
+/// and also when pressing an item in the Nav Item.
 ///
-///Necesita 2 elementos: Pages y NavItems.
+/// You need 2 elements: Pages and NavItems.
 ///
-///Las páginas y NavItems deben de tener la misma cantidad de elementos.
+/// Pages and NavItems must have the same number of elements.
 class ScrollNavigation extends StatefulWidget {
   ScrollNavigation({
     Key key,
@@ -25,43 +25,40 @@ class ScrollNavigation extends StatefulWidget {
     this.appBar,
   }) : super(key: key);
 
-  ///Es la página incial que mostrará. El valor tiene que coincidir
-  ///con los índices existentes y el número total de Nav Items
+  /// It is the initial page that will show. The value must match
+  /// with the existing indexes and the total number of Nav Items
   final int initialPage;
 
-  ///Son las páginas que tendrá el Scroll
+  /// Are the pages that the Scroll Page will have
   final List<Widget> pages;
 
-  ///Mostrará un AppBar o cualquier otro Widget.
-  ///Ignorará los argumentos: [backgroundColorNav] y [appBarBrightnessLight].
+  /// It will show an AppBar or any other PreferredSizeWidget.
+  /// Ignore the arguments: [backgroundColorNav] and [appBarBrightnessLight].
   final PreferredSizeWidget appBar;
 
-  ///Es el color que mostrará el icono activo y el indicador.
+  /// It is the color that the active icon and indicator will show.
   final Color activeColor;
 
-  ///Es el color que tendrán iconos que no estan activos.
+  /// It is the color that will have icons that are not active.
   final Color desactiveColor;
 
-  ///Son el listo de elementos que tendrá el menú. Deben de coindicir con
-  ///el número total de páginas.
+  /// They are the list of elements that the menu will have.
+  /// They must match the total number of pages.
   final List<BottomNavigationBarItem> navItems;
 
-  ///Al estar activo, este se moverá a la par que se desplaza el scroll, de
-  ///otra manera, solo se moverá cuando se cambie de página.
+  /// When active, the indicator will move along with the scroll of the pages.
+  /// Of other way, it will only move when you change page.
   final bool identifierPhysics;
 
-  ///Mostrará el identificador. Al ser falso, se ignorará el argumento
-  ///[identifierPhysics]
+  /// It will show the identifier.
+  /// If false, the argument [identifierPhysics] will be ignored
   final bool showIdentifier;
 
-  ///Es el color que tendrá la barra de estado del teléfono. Se recomienda
-  ///que el color contraste con el color del fondo del AppBar
+  /// It is the color that the phone's status bar will have.
+  /// It is recommended that the color contrast with the background color of the AppBar
   final bool appBarBrightnessLight;
 
   final Color backgroundColorNav, backgroundColorAppBar, backgroundColorBody;
-
-  PageController pageController;
-  PageController get controller => pageController;
 
   @override
   _ScrollNavigationState createState() => _ScrollNavigationState();
@@ -87,7 +84,6 @@ class _ScrollNavigationState extends State<ScrollNavigation> {
         PageController(initialPage: widget.initialPage, keepPage: true);
     if (widget.identifierPhysics && widget.showIdentifier)
       pageController.addListener(scrollListener);
-    widget.pageController = pageController;
     super.initState();
   }
 
