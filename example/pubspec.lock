@@ -119,12 +119,10 @@ packages:
   scroll_navigation:
     dependency: "direct main"
     description:
-      path: "."
-      ref: master
-      resolved-ref: "5b8f396b121e6405cc6a5754be49f08ee268489f"
-      url: "https://github.com/seel-channel/scroll_navigation"
-    source: git
-    version: "0.0.1"
+      name: scroll_navigation
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   sky_engine:
     dependency: transitive
     description: flutter

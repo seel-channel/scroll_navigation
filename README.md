@@ -2,7 +2,7 @@
 
 ## DEMO
 
-<img src="assets/readme/demo.gif" alt="drawing" width="200"/>
+![](assets/readme/demo.gif)
 
 <br><br>
 
@@ -85,7 +85,7 @@ return ScrollNavigation(
 
 #### Demo
 
-<img src="assets/readme/fullyEditable.jpg" alt="drawing" width="200"/>
+![](assets/readme/fullyEditable.jpg)
 
 #### Code
 
