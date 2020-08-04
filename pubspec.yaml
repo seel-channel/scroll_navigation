@@ -1,0 +1,16 @@
+name: scroll_navigation
+description: It is a navigation by gestures and taps. You can scroll from left to right or tap on the navigation icons.
+version: 0.0.1
+author: Felipe Murguia
+homepage:
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
