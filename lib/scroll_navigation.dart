@@ -232,3 +232,126 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     );
   }
 }
+
+class Screen extends StatelessWidget {
+  Screen({
+    Key key,
+    this.body,
+    this.floatingButton,
+    this.returnButton = false,
+    this.title,
+    this.leftWidget,
+    this.rightWidget,
+    this.backgroundColor = Colors.white,
+    this.returnButtonColor = Colors.grey,
+  }) : super(key: key);
+
+  final bool returnButton;
+  final Widget leftWidget, title, rightWidget;
+  final Widget body, floatingButton;
+  final Color backgroundColor, returnButtonColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: body,
+      floatingActionButton: floatingButton,
+      resizeToAvoidBottomPadding: false,
+    );
+  }
+
+  Widget appBar(BuildContext context) {
+    return PreferredSize(
+      preferredSize: Size.fromHeight(kToolbarHeight * 1.5),
+      child: Container(
+        height: MediaQuery.of(context).size.width * 0.2,
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: -3,
+              blurRadius: 2,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                flex: 10,
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: returnButton
+                      ? GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child:
+                              Icon(Icons.arrow_back, color: returnButtonColor),
+                        )
+                      : leftWidget,
+                ),
+              ),
+              Expanded(
+                flex: 70,
+                child: title,
+              ),
+              Expanded(
+                flex: 10,
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: rightWidget,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DoubleFloatingIcon extends StatelessWidget {
+  const DoubleFloatingIcon({
+    Key key,
+    this.smallIcon,
+    this.bigIcon,
+    this.smallIconOnPressed,
+    this.bigIconOnPressed,
+    this.smallIconBackground = Colors.grey,
+    this.bigIconBackground = Colors.blue,
+  }) : super(key: key);
+
+  final Icon smallIcon, bigIcon;
+  final Color smallIconBackground, bigIconBackground;
+  final void Function() smallIconOnPressed, bigIconOnPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Container(
+          height: 45,
+          width: 45,
+          child: FittedBox(
+            child: FloatingActionButton(
+              child: smallIcon,
+              backgroundColor: bigIconBackground,
+              onPressed: smallIconOnPressed,
+            ),
+          ),
+        ),
+        SizedBox(height: 10),
+        FloatingActionButton(
+          child: bigIcon,
+          backgroundColor: bigIconBackground,
+          onPressed: bigIconOnPressed,
+        ),
+      ],
+    );
+  }
+}
