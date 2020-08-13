@@ -29,6 +29,7 @@ return ScrollNavigation(
   //DEFAULT VALUES
   //initialPage = 0,
   //showIdentifier = true,
+  //showNavItemsTitle = false,
   //identifierPhysics = true,
   //identifierOnBottom = true,
   //activeColor = Colors.blue,
@@ -72,8 +73,6 @@ return ScrollNavigation(
 <br><br>
 
 ## Identifier Details
-
-#### Demo
 
 |           identifierPhysics = True            |           identifierPhysics = False            |
 | :-------------------------------------------: | :--------------------------------------------: |
