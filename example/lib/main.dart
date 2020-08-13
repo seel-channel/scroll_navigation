@@ -26,11 +26,15 @@ class _HomePageState extends State<HomePage> {
     return ScrollNavigation(
       initialPage: 4,
       pages: [
-        Screen(title: title("Camera"), body: Container(color: Colors.blue)),
-        Screen(title: title("Messages"), body: Container(color: Colors.green)),
-        Screen(title: title("Favorite"), body: Container(color: Colors.amber)),
-        Screen(title: title("Activity"), body: Container(color: Colors.yellow)),
-        Screen(title: title("Home")),
+        Screen(title: title("Camera")),
+        Screen(title: title("Messages"), backgroundColor: Colors.red[50]),
+        Screen(title: title("Favor"), body: Container(color: Colors.cyan[50])),
+        Screen(title: title("Activity"), backgroundColor: Colors.yellow[50]),
+        Screen(
+          title: title("Home"),
+          leftWidget: Icon(Icons.menu, color: Colors.grey),
+          rightWidget: Icon(Icons.favorite, color: Colors.grey),
+        )
       ],
       navItems: [
         navItem(Icons.camera),
