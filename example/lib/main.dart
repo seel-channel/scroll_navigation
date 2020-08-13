@@ -25,52 +25,50 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return ScrollNavigation(
       initialPage: 4,
-      pages: <Widget>[
+      pages: [
         Screen(title: title("Camera"), body: Container(color: Colors.blue)),
         Screen(title: title("Messages"), body: Container(color: Colors.green)),
         Screen(title: title("Favorite"), body: Container(color: Colors.amber)),
         Screen(title: title("Activity"), body: Container(color: Colors.yellow)),
-        Screen(title: title("Home"), body: Container(color: Colors.lightBlue)),
+        Screen(title: title("Home")),
       ],
-      navItems: bottomNavItems(),
-      pagesActionButtons: <Widget>[
+      navItems: [
+        navItem(Icons.camera),
+        navItem(Icons.chat),
+        navItem(Icons.favorite),
+        navItem(Icons.notifications),
+        navItem(Icons.home),
+      ],
+      pagesActionButtons: [
         FloatingActionButton(
           child: Icon(Icons.receipt),
-          backgroundColor: Colors.grey[600],
+          backgroundColor: Colors.red,
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => Screen(
+                centerTitle: false,
                 returnButton: true, //IMPORTANT TO RETURN!
-                title: title("New Page"),
+                title: title("New Page2"),
                 body: Container(color: Colors.amber),
                 floatingButton: FloatingActionButton(
-                  onPressed: () => print("Cool :)"),
-                  child: Icon(Icons.add),
-                ),
+                    onPressed: () => null, child: Icon(Icons.add)),
               ),
             ),
           ),
         ),
         null,
+        FloatingActionButton(
+          onPressed: () => print("Cooler Daniel xd"),
+          child: Icon(Icons.sync),
+        ),
         null,
-        null,
-        DoubleFloatingIcon(
-          smallIcon: Icon(Icons.edit),
-          bigIcon: Icon(Icons.search),
+        FloatingActionButton(
+          onPressed: () => print("Cool :)"),
+          child: Icon(Icons.add),
         ),
       ],
     );
-  }
-
-  List<BottomNavigationBarItem> bottomNavItems() {
-    return [
-      navItem(Icons.camera),
-      navItem(Icons.chat),
-      navItem(Icons.favorite),
-      navItem(Icons.notifications),
-      navItem(Icons.home),
-    ];
   }
 
   BottomNavigationBarItem navItem(IconData icon) {
@@ -78,16 +76,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget title(String title) {
-    return Center(
-      child: Text(
-        title.toUpperCase(),
-        style: TextStyle(
-          fontSize: 22,
-          color: Colors.grey[600],
-          fontWeight: FontWeight.bold,
-          wordSpacing: 1.5,
-          letterSpacing: 0.5,
-        ),
+    return Text(
+      title.toUpperCase(),
+      style: TextStyle(
+        fontSize: 22,
+        color: Colors.grey,
+        fontWeight: FontWeight.bold,
+        wordSpacing: 1.5,
+        letterSpacing: 0.5,
       ),
     );
   }
