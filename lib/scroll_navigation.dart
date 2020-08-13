@@ -233,6 +233,10 @@ class ScrollNavigationState extends State<ScrollNavigation> {
   }
 }
 
+// It is a Widget very similar to a Scaffold, in a way, it uses the
+///Scaffold core, but fixes some problems the Scaffold has with the
+///ScrollNavigation.
+
 class Screen extends StatelessWidget {
   Screen({
     Key key,
@@ -242,19 +246,47 @@ class Screen extends StatelessWidget {
     this.title,
     this.leftWidget,
     this.rightWidget,
+    this.centerTitle = true,
     this.backgroundColor = Colors.white,
     this.returnButtonColor = Colors.grey,
+    this.heightMultiplicator = 1.5,
   }) : super(key: key);
 
+  ///It is used to give more space, padding or separation to the AppBar.
+  final double heightMultiplicator;
+
+  ///If you opened a new Screen with the Navigator.push(), it will show
+  ///an icon to close the Screen
   final bool returnButton;
-  final Widget leftWidget, title, rightWidget;
-  final Widget body, floatingButton;
+
+  ///Center the Title Widgets.
+  final bool centerTitle;
+
+  ///Appears to the left of the Appbar in the same position as the [returnButton].
+  ///If the returnButton is active, this Widget will be ignored.
+  final Widget leftWidget;
+
+  ///It is the central widget of the Appbar, it is recommended to use for titles.
+  final Widget title;
+
+  ///Appears to the right of the Appbar. You can put a [Row],
+  ///but the [MainAxisSize.min] property must be activated
+  final Widget rightWidget;
+
+  ///It is the body of the Scaffold, you can place any Widget.
+  final Widget body;
+
+  ///It is recommended to use the [pages ActionButtons] property of the Scroll Navigation.
+  ///Otherwise, it works like the [floatingActionButton] of the Scaffold
+  final Widget floatingButton;
+
+  ///Color that customizes the AppBar.
   final Color backgroundColor, returnButtonColor;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: appBar(context),
       body: body,
       floatingActionButton: floatingButton,
       resizeToAvoidBottomPadding: false,
@@ -262,10 +294,11 @@ class Screen extends StatelessWidget {
   }
 
   Widget appBar(BuildContext context) {
+    double paddingConst =
+        MediaQuery.of(context).size.width * 0.05 * heightMultiplicator;
     return PreferredSize(
-      preferredSize: Size.fromHeight(kToolbarHeight * 1.5),
+      preferredSize: Size.fromHeight(kToolbarHeight * heightMultiplicator),
       child: Container(
-        height: MediaQuery.of(context).size.width * 0.2,
         decoration: BoxDecoration(
           color: backgroundColor,
           boxShadow: [
@@ -278,80 +311,60 @@ class Screen extends StatelessWidget {
           ],
         ),
         child: SafeArea(
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                flex: 10,
-                child: Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: returnButton
-                      ? GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child:
-                              Icon(Icons.arrow_back, color: returnButtonColor),
-                        )
-                      : leftWidget,
-                ),
-              ),
-              Expanded(
-                flex: 70,
-                child: title,
-              ),
-              Expanded(
-                flex: 10,
-                child: Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: rightWidget,
-                ),
-              ),
-            ],
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: paddingConst),
+            child: centerTitle
+                ? Stack(
+                    alignment: AlignmentDirectional.centerStart,
+                    children: [
+                      Center(child: title),
+                      Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: validateLeftWidget(context)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [Container(child: rightWidget)],
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: leftWidget == null && !returnButton
+                            ? null
+                            : Padding(
+                                padding: EdgeInsets.only(right: paddingConst),
+                                child: validateLeftWidget(context)),
+                      ),
+                      Expanded(
+                        flex: 70,
+                        child: title,
+                      ),
+                      Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: rightWidget == null
+                            ? null
+                            : Padding(
+                                padding: EdgeInsets.only(left: paddingConst),
+                                child: rightWidget),
+                      ),
+                    ],
+                  ),
           ),
         ),
       ),
     );
   }
-}
 
-class DoubleFloatingIcon extends StatelessWidget {
-  const DoubleFloatingIcon({
-    Key key,
-    this.smallIcon,
-    this.bigIcon,
-    this.smallIconOnPressed,
-    this.bigIconOnPressed,
-    this.smallIconBackground = Colors.grey,
-    this.bigIconBackground = Colors.blue,
-  }) : super(key: key);
-
-  final Icon smallIcon, bigIcon;
-  final Color smallIconBackground, bigIconBackground;
-  final void Function() smallIconOnPressed, bigIconOnPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Container(
-          height: 45,
-          width: 45,
-          child: FittedBox(
-            child: FloatingActionButton(
-              child: smallIcon,
-              backgroundColor: bigIconBackground,
-              onPressed: smallIconOnPressed,
-            ),
-          ),
-        ),
-        SizedBox(height: 10),
-        FloatingActionButton(
-          child: bigIcon,
-          backgroundColor: bigIconBackground,
-          onPressed: bigIconOnPressed,
-        ),
-      ],
-    );
+  Widget validateLeftWidget(BuildContext context) {
+    if (returnButton)
+      return GestureDetector(
+        onTap: () => Navigator.pop(context),
+        child: Icon(Icons.arrow_back, color: returnButtonColor),
+      );
+    else
+      return leftWidget;
   }
 }
