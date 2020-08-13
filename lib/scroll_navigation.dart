@@ -16,6 +16,7 @@ class ScrollNavigation extends StatefulWidget {
     this.pagesActionButtons,
     this.initialPage = 0,
     this.showIdentifier = true,
+    this.showNavItemsTitle = false,
     this.identifierPhysics = true,
     this.identifierOnBottom = true,
     this.activeColor = Colors.blue,
@@ -52,6 +53,9 @@ class ScrollNavigation extends StatefulWidget {
   /// It will show the identifier.
   /// If false, the argument [identifierPhysics] will be ignored
   final bool showIdentifier;
+
+  ///It will show the title of the navigation elements.
+  final bool showNavItemsTitle;
 
   ///Mostrará el identificador, en la parte inferior, si no en la parte superior
   ///de la barra de navegación
@@ -195,8 +199,9 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     return Stack(
       children: <Widget>[
         BottomNavigationBar(
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
+          selectedFontSize: 12.0,
+          showSelectedLabels: widget.showNavItemsTitle,
+          showUnselectedLabels: widget.showNavItemsTitle,
           currentIndex: _bottomSelectedIndex,
           selectedItemColor: widget.activeColor,
           unselectedItemColor: widget.desactiveColor,
