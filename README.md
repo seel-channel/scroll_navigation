@@ -14,7 +14,9 @@
 - Page movement when tapping an icon.
 - Indicator that follows the scroll.
 - Works with the back button.
+- Fancy animations on Floating Buttons.
 - Customizable colors.
+- Easy and powerful implementation! :)
 
 ---
 
@@ -25,21 +27,20 @@
 ```dart
 return ScrollNavigation(
   //DEFAULT VALUES
-  // initialPage = 0,
-  // showIdentifier = true,
-  // identifierPhysics = true,
-  // activeColor = Colors.blue,
-  // desactiveColor = Colors.grey,
-  // backgroundColorBody = Colors.grey[100],
-  // backgroundColorNav = Colors.white,
-  // backgroundColorAppBar = Colors.white,
-  // appBarBrightnessLight = false,
+  //initialPage = 0,
+  //showIdentifier = true,
+  //identifierPhysics = true,
+  //identifierOnBottom = true,
+  //activeColor = Colors.blue,
+  //desactiveColor = Colors.grey,
+  //backgroundColorNav = Colors.white,
+  //backgroundColorBody = Colors.grey[100],
   pages: <Widget>[
-    Container(color: Colors.blue),
-    Container(color: Colors.green),
-    Container(color: Colors.amber),
-    Container(color: Colors.yellow),
-    Container(color: Colors.lightBlue),
+    Screen(title: title("Camera")),
+    Screen(title: title("Messages"), backgroundColor: Colors.red[50]),
+    Container(color: Colors.cyan[50]),
+    Screen(title: title("Activity"), backgroundColor: Colors.yellow[50]),
+    Screen(title: title("Home")),
   ],
   navItems: <BottomNavigationBarItem>[
     BottomNavigationBarItem(icon: Icon(Icons.camera), title: Text(""));
@@ -47,6 +48,19 @@ return ScrollNavigation(
     BottomNavigationBarItem(icon: Icon(Icons.favorite), title: Text(""));
     BottomNavigationBarItem(icon: Icon(Icons.notifications), title: Text(""));
     BottomNavigationBarItem(icon: Icon(Icons.home), title: Text(""));
+  ],
+  pagesActionButtons: [
+    FloatingActionButton( //PAGE 1
+      child: Icon(Icons.receipt),onPressed: () => null
+    ),
+    null,
+    FloatingActionButton( //PAGE 3
+      child: Icon(Icons.sync), onPressed: () => null,
+    ),
+    null,
+    FloatingActionButton( //PAGE 5
+      child: Icon(Icons.add), onPressed: () => print("Cool :)"),
+    ),
   ],
 );
 ```
@@ -57,7 +71,7 @@ return ScrollNavigation(
 
 <br><br>
 
-## Identifier Physics
+## Identifier Details
 
 #### Demo
 
@@ -77,24 +91,15 @@ return ScrollNavigation(
 
 <br><br>
 
----
+#### showIdentifier = False
 
-<br><br>
-
-## Customizable colors
-
-#### Demo
-
-![](assets/readme/fullyEditable.jpg)
+![](assets/readme/showIdentifierFalse.gif)
 
 #### Code
 
 ```dart
 return ScrollNavigation(
-    activeColor = Colors.amber,
-    desactiveColor = Colors.white,
-    backgroundColorNav = Colors.black,
-    backgroundColorAppBar = Colors.red,
+    showIdentifier = false, //Default is true
     pages: <Widget>[],
     navItems: <BottomNavigationBarItem>[],
 );
@@ -106,28 +111,36 @@ return ScrollNavigation(
 
 <br><br>
 
-## More details
+## Screen Details
 
-|            Fixed AppBar            |           showIdentifier = False           |
-| :--------------------------------: | :----------------------------------------: |
-| ![](assets/readme/fixedAppBar.gif) | ![](assets/readme/showIdentifierFalse.gif) |
+#### Screen fixes some problems the Scaffold has with the ScrollNavigation.
 
-#### Fixed AppBar Code
+|               Without Widgets               |               With Widgets               |
+| :-----------------------------------------: | :--------------------------------------: |
+| ![](assets/readme/screenWithoutWidgets.jpg) | ![](assets/readme/screenWithWidgets.jpg) |
+
+#### Without Widgets Code
 
 ```dart
 return ScrollNavigation(
-    appBar: AppBar(title: Text("Scroll Navigation")),
-    pages: <Widget>[],
+    pages: <Widget>[
+      Screen(), // <--
+    ],
     navItems: <BottomNavigationBarItem>[],
 );
 ```
 
-#### Don't showIdentifier Code
+#### Without Code
 
 ```dart
 return ScrollNavigation(
-    showIdentifier = false,
-    pages: <Widget>[],
+    pages: <Widget>[
+      Screen(
+        title: title("Home"), //Function in the Example
+        leftWidget: Icon(Icons.menu, color: Colors.grey),
+        rightWidget: Icon(Icons.favorite, color: Colors.grey),
+      )
+    ],
     navItems: <BottomNavigationBarItem>[],
 );
 ```
