@@ -28,8 +28,8 @@
 return ScrollNavigation(
   //DEFAULT VALUES
   //initialPage = 0,
-  //navigationOnTop = false,
   //showIdentifier = true,
+  //navigationOnTop = false,
   //showNavItemsTitle = false,
   //identifierPhysics = true,
   //identifierOnBottom = true,
@@ -40,7 +40,7 @@ return ScrollNavigation(
   pages: <Widget>[
     Screen(title: title("Camera")),
     Screen(title: title("Messages"), backgroundColor: Colors.red[50]),
-    Container(color: Colors.cyan[50]),
+    Screen(body: Container(color: Colors.cyan[50]), showAppBar: false),
     Screen(title: title("Activity"), backgroundColor: Colors.yellow[50]),
     Screen(title: title("Home")),
   ],
@@ -55,11 +55,11 @@ return ScrollNavigation(
     FloatingActionButton( //PAGE 1
       child: Icon(Icons.receipt),onPressed: () => null
     ),
-    null,
+    null, //PAGE 2
     FloatingActionButton( //PAGE 3
       child: Icon(Icons.sync), onPressed: () => null,
     ),
-    null,
+    null, //PAGE 4
     FloatingActionButton( //PAGE 5
       child: Icon(Icons.add), onPressed: () => print("Cool :)"),
     ),
@@ -146,26 +146,16 @@ return ScrollNavigation(
 #### Without Widgets Code
 
 ```dart
-return ScrollNavigation(
-    pages: <Widget>[
-      Screen(), // <--
-    ],
-    navItems: <BottomNavigationBarItem>[],
-);
+return Screen();
 ```
 
-#### With Code
+#### With Widgets Code
 
 ```dart
-return ScrollNavigation(
-    pages: <Widget>[
-      Screen(
-        title: title("Home"), //Function in the Example
-        leftWidget: Icon(Icons.menu, color: Colors.grey),
-        rightWidget: Icon(Icons.favorite, color: Colors.grey),
-      )
-    ],
-    navItems: <BottomNavigationBarItem>[],
+return Screen(
+    title: title("Home"), //Function in the Example
+    leftWidget: Icon(Icons.menu, color: Colors.grey),
+    rightWidget: Icon(Icons.favorite, color: Colors.grey),
 );
 ```
 
@@ -178,15 +168,10 @@ return ScrollNavigation(
 #### Code
 
 ```dart
-return ScrollNavigation(
-    pages: <Widget>[
-      Screen(
-        leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
-        title: title("New Home"),
-        centerTitle: false,
-        heightMultiplicator: 1,
-      )
-    ],
-    navItems: <BottomNavigationBarItem>[],
+return Screen(
+    leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
+    title: title("New Home"),
+    heightMultiplicator: 1,
+    centerTitle: false,
 );
 ```
