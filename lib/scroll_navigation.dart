@@ -15,6 +15,7 @@ class ScrollNavigation extends StatefulWidget {
     @required this.navItems,
     this.pagesActionButtons,
     this.initialPage = 0,
+    this.navigationOnTop = false,
     this.showIdentifier = true,
     this.showNavItemsTitle = false,
     this.identifierPhysics = true,
@@ -38,6 +39,9 @@ class ScrollNavigation extends StatefulWidget {
 
   /// It is the color that the active icon and indicator will show.
   final Color activeColor;
+
+  ///Change navigation position
+  final bool navigationOnTop;
 
   /// It is the color that will have icons that are not active.
   final Color desactiveColor;
@@ -120,12 +124,18 @@ class ScrollNavigationState extends State<ScrollNavigation> {
             children: widget.pages,
             controller: _pageController,
             onPageChanged: (index) => _onChangePageIndex(index)),
-        resizeToAvoidBottomPadding: false,
-        bottomNavigationBar: _buildBottomNavigation(context),
+        appBar: widget.navigationOnTop
+            ? _preferredSafeArea(
+                backgroundColor: widget.backgroundColorNav,
+                child: _buildBottomNavigation(context, elevation: 0))
+            : null,
+        bottomNavigationBar:
+            !widget.navigationOnTop ? _buildBottomNavigation(context) : null,
         floatingActionButton: _pagesActionButtons[_bottomSelectedIndex],
         backgroundColor: widget.backgroundColorBody != null
             ? widget.backgroundColorBody
             : Colors.grey[100],
+        resizeToAvoidBottomPadding: false,
       ),
     );
   }
@@ -173,7 +183,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
   }
 
   //WIDGETS
-  Widget _buildBottomNavigation(BuildContext context) {
+  Widget _buildBottomNavigation(BuildContext context, {double elevation = 14}) {
     if (widget.showIdentifier) {
       double navWidth = MediaQuery.of(context).size.width;
       double itemLenght = 1 / widget.navItems.length;
@@ -199,6 +209,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     return Stack(
       children: <Widget>[
         BottomNavigationBar(
+          elevation: elevation,
           selectedFontSize: 12.0,
           showSelectedLabels: widget.showNavItemsTitle,
           showUnselectedLabels: widget.showNavItemsTitle,
@@ -238,10 +249,33 @@ class ScrollNavigationState extends State<ScrollNavigation> {
   }
 }
 
+PreferredSize _preferredSafeArea({
+  Widget child,
+  Color backgroundColor = Colors.white,
+  double heightMultiplicator = 1,
+}) {
+  return PreferredSize(
+    preferredSize: Size.fromHeight(kToolbarHeight * heightMultiplicator),
+    child: Container(
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: -3,
+            blurRadius: 2,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: SafeArea(child: child),
+    ),
+  );
+}
+
 // It is a Widget very similar to a Scaffold, in a way, it uses the
 ///Scaffold core, but fixes some problems the Scaffold has with the
 ///ScrollNavigation.
-
 class Screen extends StatelessWidget {
   Screen({
     Key key,
@@ -301,64 +335,50 @@ class Screen extends StatelessWidget {
   Widget appBar(BuildContext context) {
     double paddingConst =
         MediaQuery.of(context).size.width * 0.05 * heightMultiplicator;
-    return PreferredSize(
-      preferredSize: Size.fromHeight(kToolbarHeight * heightMultiplicator),
-      child: Container(
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: -3,
-              blurRadius: 2,
-              offset: Offset(0, 3),
-            ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: paddingConst),
-            child: centerTitle
-                ? Stack(
-                    alignment: AlignmentDirectional.centerStart,
-                    children: [
-                      Center(child: title),
-                      Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: validateLeftWidget(context)),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [Container(child: rightWidget)],
-                      ),
-                    ],
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: leftWidget == null && !returnButton
-                            ? null
-                            : Padding(
-                                padding: EdgeInsets.only(right: paddingConst),
-                                child: validateLeftWidget(context)),
-                      ),
-                      Expanded(
-                        flex: 70,
-                        child: title,
-                      ),
-                      Align(
-                        alignment: AlignmentDirectional.centerEnd,
-                        child: rightWidget == null
-                            ? null
-                            : Padding(
-                                padding: EdgeInsets.only(left: paddingConst),
-                                child: rightWidget),
-                      ),
-                    ],
+    return _preferredSafeArea(
+      backgroundColor: backgroundColor,
+      heightMultiplicator: heightMultiplicator,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: paddingConst),
+        child: centerTitle
+            ? Stack(
+                alignment: AlignmentDirectional.centerStart,
+                children: [
+                  Center(child: title),
+                  Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: validateLeftWidget(context)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [Container(child: rightWidget)],
                   ),
-          ),
-        ),
+                ],
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: leftWidget == null && !returnButton
+                        ? null
+                        : Padding(
+                            padding: EdgeInsets.only(right: paddingConst),
+                            child: validateLeftWidget(context)),
+                  ),
+                  Expanded(
+                    flex: 70,
+                    child: title,
+                  ),
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: rightWidget == null
+                        ? null
+                        : Padding(
+                            padding: EdgeInsets.only(left: paddingConst),
+                            child: rightWidget),
+                  ),
+                ],
+              ),
       ),
     );
   }
