@@ -52,7 +52,7 @@ class _HomePageState extends State<HomePage> {
             MaterialPageRoute(
               builder: (context) => Screen(
                 centerTitle: false,
-                returnButton: true, //IMPORTANT TO RETURN!
+                leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
                 title: title("New Page2"),
                 body: Container(color: Colors.amber),
                 floatingButton: FloatingActionButton(

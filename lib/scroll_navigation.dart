@@ -273,6 +273,27 @@ PreferredSize _preferredSafeArea({
   );
 }
 
+///It's a simple icon that serves as a return button,
+///It's function is to close the context.
+class ScreenReturnButton extends StatelessWidget {
+  const ScreenReturnButton({Key key, this.size = 24, this.color = Colors.grey})
+      : super(key: key);
+
+  ///The size of the icon in logical pixels.
+  final double size;
+
+  ///The color to use when drawing the icon.
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.pop(context),
+      child: Icon(Icons.arrow_back, color: color, size: size),
+    );
+  }
+}
+
 // It is a Widget very similar to a Scaffold, in a way, it uses the
 ///Scaffold core, but fixes some problems the Scaffold has with the
 ///ScrollNavigation.
@@ -281,25 +302,20 @@ class Screen extends StatelessWidget {
     Key key,
     this.body,
     this.floatingButton,
-    this.returnButton = false,
-    this.title,
     this.leftWidget,
+    this.title,
     this.rightWidget,
     this.centerTitle = true,
     this.backgroundColor = Colors.white,
-    this.returnButtonColor = Colors.grey,
     this.heightMultiplicator = 1.5,
   }) : super(key: key);
 
-  ///It is used to give more space, padding or separation to the AppBar.
-  final double heightMultiplicator;
+  ///It is the body of the Scaffold, you can place any Widget.
+  final Widget body;
 
-  ///If you opened a new Screen with the Navigator.push(), it will show
-  ///an icon to close the Screen
-  final bool returnButton;
-
-  ///Center the Title Widgets.
-  final bool centerTitle;
+  ///It is recommended to use the [pages ActionButtons] property of the Scroll Navigation.
+  ///Otherwise, it works like the [floatingActionButton] of the Scaffold
+  final Widget floatingButton;
 
   ///Appears to the left of the Appbar in the same position as the [returnButton].
   ///If the returnButton is active, this Widget will be ignored.
@@ -312,15 +328,14 @@ class Screen extends StatelessWidget {
   ///but the [MainAxisSize.min] property must be activated
   final Widget rightWidget;
 
-  ///It is the body of the Scaffold, you can place any Widget.
-  final Widget body;
-
-  ///It is recommended to use the [pages ActionButtons] property of the Scroll Navigation.
-  ///Otherwise, it works like the [floatingActionButton] of the Scaffold
-  final Widget floatingButton;
+  ///Center the Title Widgets.
+  final bool centerTitle;
 
   ///Color that customizes the AppBar.
-  final Color backgroundColor, returnButtonColor;
+  final Color backgroundColor;
+
+  ///It is used to give more space, padding or separation to the AppBar.
+  final double heightMultiplicator;
 
   @override
   Widget build(BuildContext context) {
@@ -341,55 +356,37 @@ class Screen extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: paddingConst),
         child: centerTitle
-            ? Stack(
-                alignment: AlignmentDirectional.centerStart,
-                children: [
-                  Center(child: title),
-                  Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: validateLeftWidget(context)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [Container(child: rightWidget)],
-                  ),
-                ],
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: leftWidget == null && !returnButton
-                        ? null
-                        : Padding(
-                            padding: EdgeInsets.only(right: paddingConst),
-                            child: validateLeftWidget(context)),
-                  ),
-                  Expanded(
-                    flex: 70,
-                    child: title,
-                  ),
-                  Align(
-                    alignment: AlignmentDirectional.centerEnd,
-                    child: rightWidget == null
-                        ? null
-                        : Padding(
-                            padding: EdgeInsets.only(left: paddingConst),
-                            child: rightWidget),
-                  ),
-                ],
-              ),
+            ? Stack(alignment: AlignmentDirectional.centerStart, children: [
+                Center(child: title),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: leftWidget,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [Container(child: rightWidget)],
+                ),
+              ])
+            : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: leftWidget == null
+                      ? null
+                      : Padding(
+                          padding: EdgeInsets.only(right: paddingConst),
+                          child: leftWidget),
+                ),
+                Expanded(flex: 70, child: title),
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: rightWidget == null
+                      ? null
+                      : Padding(
+                          padding: EdgeInsets.only(left: paddingConst),
+                          child: rightWidget),
+                ),
+              ]),
       ),
     );
-  }
-
-  Widget validateLeftWidget(BuildContext context) {
-    if (returnButton)
-      return GestureDetector(
-        onTap: () => Navigator.pop(context),
-        child: Icon(Icons.arrow_back, color: returnButtonColor),
-      );
-    else
-      return leftWidget;
   }
 }
