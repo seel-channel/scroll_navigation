@@ -305,6 +305,7 @@ class Screen extends StatelessWidget {
     this.leftWidget,
     this.title,
     this.rightWidget,
+    this.showAppBar = true,
     this.centerTitle = true,
     this.backgroundColor = Colors.white,
     this.heightMultiplicator = 1.5,
@@ -331,6 +332,10 @@ class Screen extends StatelessWidget {
   ///Center the Title Widgets.
   final bool centerTitle;
 
+  ///If active, it shows the appbar; otherwise it will not.
+  ///Ignoring the left widget, right widget, and title widget
+  final bool showAppBar;
+
   ///Color that customizes the AppBar.
   final Color backgroundColor;
 
@@ -340,7 +345,7 @@ class Screen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: appBar(context),
+      appBar: showAppBar ? appBar(context) : null,
       body: body,
       floatingActionButton: floatingButton,
       resizeToAvoidBottomPadding: false,
