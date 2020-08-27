@@ -28,7 +28,11 @@ class _HomePageState extends State<HomePage> {
       pages: [
         Screen(title: title("Camera")),
         Screen(title: title("Messages"), backgroundColor: Colors.red[50]),
-        Screen(title: title("Favor"), body: Container(color: Colors.cyan[50])),
+        Screen(
+          title: title("Favor"),
+          body: Container(color: Colors.cyan[50]),
+          showAppBar: false,
+        ),
         Screen(title: title("Activity"), backgroundColor: Colors.yellow[50]),
         Screen(
           title: title("Home"),
@@ -52,9 +56,9 @@ class _HomePageState extends State<HomePage> {
             MaterialPageRoute(
               builder: (context) => Screen(
                 centerTitle: false,
+                heightMultiplicator: 1,
                 leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
-                title: title("New Page2"),
-                body: Container(color: Colors.amber),
+                title: title("New Home"),
                 floatingButton: FloatingActionButton(
                     onPressed: () => null, child: Icon(Icons.add)),
               ),
