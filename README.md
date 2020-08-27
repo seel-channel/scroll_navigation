@@ -28,6 +28,7 @@
 return ScrollNavigation(
   //DEFAULT VALUES
   //initialPage = 0,
+  //navigationOnTop = false,
   //showIdentifier = true,
   //showNavItemsTitle = false,
   //identifierPhysics = true,
@@ -63,6 +64,30 @@ return ScrollNavigation(
       child: Icon(Icons.add), onPressed: () => print("Cool :)"),
     ),
   ],
+);
+```
+
+<br><br>
+
+---
+
+<br><br>
+
+## Navigation Details
+
+(It's recommended to set showAppBar = false on the Screen Widget)
+
+|         navigationOnTop = True         |          navigationOnTop = False          |
+| :------------------------------------: | :---------------------------------------: |
+| ![](assets/readme/navigationOnTop.jpg) | ![](assets/readme/navigationOnBottom.jpg) |
+
+#### Code
+
+```dart
+return ScrollNavigation(
+    navigationOnTop = true, //Default is false
+    pages: <Widget>[],
+    navItems: <BottomNavigationBarItem>[],
 );
 ```
 
@@ -129,7 +154,7 @@ return ScrollNavigation(
 );
 ```
 
-#### Without Code
+#### With Code
 
 ```dart
 return ScrollNavigation(
@@ -138,6 +163,28 @@ return ScrollNavigation(
         title: title("Home"), //Function in the Example
         leftWidget: Icon(Icons.menu, color: Colors.grey),
         rightWidget: Icon(Icons.favorite, color: Colors.grey),
+      )
+    ],
+    navItems: <BottomNavigationBarItem>[],
+);
+```
+
+<br><br>
+
+#### More details
+
+![](assets/readme/screenMoreDetails.jpg)
+
+#### Code
+
+```dart
+return ScrollNavigation(
+    pages: <Widget>[
+      Screen(
+        leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
+        title: title("New Home"),
+        centerTitle: false,
+        heightMultiplicator: 1,
       )
     ],
     navItems: <BottomNavigationBarItem>[],
