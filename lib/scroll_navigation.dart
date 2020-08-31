@@ -16,10 +16,11 @@ class ScrollNavigation extends StatefulWidget {
     this.pagesActionButtons,
     this.initialPage = 0,
     this.navigationOnTop = false,
-    this.showIdentifier = true,
     this.showNavItemsTitle = false,
+    this.showIdentifier = true,
     this.identifierPhysics = true,
     this.identifierOnBottom = true,
+    this.identifierWithBorder = true,
     this.activeColor = Colors.blue,
     this.desactiveColor = Colors.grey,
     this.backgroundColorBody,
@@ -60,6 +61,9 @@ class ScrollNavigation extends StatefulWidget {
 
   ///It will show the title of the navigation elements.
   final bool showNavItemsTitle;
+
+  ///If true show a circular border radius else show a simple rectangle.
+  final bool identifierWithBorder;
 
   ///Mostrará el identificador, en la parte inferior, si no en la parte superior
   ///de la barra de navegación
@@ -235,13 +239,15 @@ class ScrollNavigationState extends State<ScrollNavigation> {
               width: _identifier["width"],
               decoration: BoxDecoration(
                 color: widget.activeColor,
-                borderRadius: widget.identifierOnBottom
-                    ? BorderRadius.only(
-                        topRight: Radius.circular(10.0),
-                        topLeft: Radius.circular(10.0))
-                    : BorderRadius.only(
-                        bottomRight: Radius.circular(10.0),
-                        bottomLeft: Radius.circular(10.0)),
+                borderRadius: widget.identifierWithBorder
+                    ? widget.identifierOnBottom
+                        ? BorderRadius.only(
+                            topRight: Radius.circular(10.0),
+                            topLeft: Radius.circular(10.0))
+                        : BorderRadius.only(
+                            bottomRight: Radius.circular(10.0),
+                            bottomLeft: Radius.circular(10.0))
+                    : BoxShape.rectangle,
               ),
             ),
           ),
