@@ -83,6 +83,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
   Map<String, double> _identifier = {"position": 0.0, "width": 1.0};
   Map<String, double> _scroll = {"position": 0.0, "max": 0.0, "min": 1.0};
 
+  set goToIndex(int index) => _onBottomItemTapped(index);
   PageController get controller => _pageController;
 
   @override
@@ -113,31 +114,6 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     if (_identifierPhysics && widget.showIdentifier)
       _pageController.removeListener(_scrollListener);
     super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onPressBackButton,
-      child: Scaffold(
-        body: PageView(
-            children: widget.pages,
-            controller: _pageController,
-            onPageChanged: (index) => _onChangePageIndex(index)),
-        appBar: widget.navigationOnTop
-            ? _preferredSafeArea(
-                backgroundColor: widget.backgroundColorNav,
-                child: _buildBottomNavigation(context, elevation: 0))
-            : null,
-        bottomNavigationBar:
-            !widget.navigationOnTop ? _buildBottomNavigation(context) : null,
-        floatingActionButton: _pagesActionButtons[_bottomSelectedIndex],
-        backgroundColor: widget.backgroundColorBody != null
-            ? widget.backgroundColorBody
-            : Colors.grey[100],
-        resizeToAvoidBottomPadding: false,
-      ),
-    );
   }
 
   //FUNCIONES
@@ -180,6 +156,31 @@ class ScrollNavigationState extends State<ScrollNavigation> {
       _scroll["min"] = _pageController.position.minScrollExtent;
       _scroll["max"] = _pageController.position.maxScrollExtent;
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: _onPressBackButton,
+      child: Scaffold(
+        appBar: widget.navigationOnTop
+            ? _preferredSafeArea(
+                backgroundColor: widget.backgroundColorNav,
+                child: _buildBottomNavigation(context, elevation: 0))
+            : null,
+        body: PageView(
+            children: widget.pages,
+            controller: _pageController,
+            onPageChanged: (index) => _onChangePageIndex(index)),
+        backgroundColor: widget.backgroundColorBody != null
+            ? widget.backgroundColorBody
+            : Colors.grey[100],
+        bottomNavigationBar:
+            !widget.navigationOnTop ? _buildBottomNavigation(context) : null,
+        floatingActionButton: _pagesActionButtons[_bottomSelectedIndex],
+        resizeToAvoidBottomPadding: false,
+      ),
+    );
   }
 
   //WIDGETS
