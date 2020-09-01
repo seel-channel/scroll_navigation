@@ -52,18 +52,7 @@ class _HomePageState extends State<HomePage> {
           child: Icon(Icons.receipt),
           backgroundColor: Colors.red,
           onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => Screen(
-                centerTitle: false,
-                heightMultiplicator: 1,
-                leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
-                title: title("New Home"),
-                floatingButton: FloatingActionButton(
-                    onPressed: () => null, child: Icon(Icons.add)),
-              ),
-            ),
-          ),
+              context, MaterialPageRoute(builder: (context) => newHome())),
         ),
         null,
         FloatingActionButton(
@@ -81,6 +70,23 @@ class _HomePageState extends State<HomePage> {
 
   BottomNavigationBarItem navItem(IconData icon) {
     return BottomNavigationBarItem(icon: Icon(icon), title: Text(""));
+  }
+
+  Widget newHome() {
+    return Screen(
+      centerTitle: false,
+      heightMultiplicator: 1,
+      title: title("New Home"),
+      leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
+      body: TitleScrollNavigation(
+        titles: ["Page 1", "New page 2", "Thrid page 3"],
+        pages: [
+          Container(color: Colors.blue[50]),
+          Container(color: Colors.red[50]),
+          Container(color: Colors.yellow[50])
+        ],
+      ),
+    );
   }
 
   Widget title(String title) {
