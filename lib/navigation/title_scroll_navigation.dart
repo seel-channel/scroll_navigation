@@ -43,7 +43,6 @@ class TitleScrollNavigation extends StatefulWidget {
 
 class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   bool _itemTapped = false;
-  int _bottomSelectedIndex;
   PageController _pageController;
   Cubic _animationCurve = Curves.linearToEaseOut;
   Duration _animationDuration = Duration(milliseconds: 400);
@@ -55,51 +54,25 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   void initState() {
     _pageController = PageController(initialPage: widget.initialPage);
     _pageController.addListener(_scrollListener);
-    for (var title in widget.titles) {
+    for (var title in widget.titles)
       _titlesProps[title] = {"lerp": 0.0, "width": 0.0};
-    }
+    setLerp(widget.initialPage, 1.0);
     super.initState();
   }
 
-  void _onChangePageIndex(int index) {
-    setState(() => _bottomSelectedIndex = index);
+  void setLerp(int index, double result) {
+    _titlesProps[widget.titles[index]]["lerp"] = result;
   }
 
   void _scrollListener() {
-    ScrollDirection direction = _pageController.position.userScrollDirection;
-    double _scrollScale = _scroll["max"] / (widget.pages.length - 1);
-    double scaled =
-        (_scroll["position"] - (_scrollScale * _bottomSelectedIndex + 1)) /
-            _scrollScale;
-
-    void setLerp(int index, double result) {
-      _titlesProps[widget.titles[_bottomSelectedIndex + index]]["lerp"] =
-          result;
-    }
-
+    int pageFloor = _pageController.page.floor();
     setState(() {
       _scroll["position"] = _pageController.position.pixels;
       _scroll["min"] = _pageController.position.minScrollExtent;
       _scroll["max"] = _pageController.position.maxScrollExtent;
-
-      if (direction == ScrollDirection.reverse) {
-        if (scaled > 0) {
-          setLerp(0, scaled);
-          setLerp(-1, 1 - scaled);
-        } else {
-          setLerp(1, scaled + 1);
-          setLerp(0, 1 - scaled);
-        }
-      } else {
-        if (scaled > 0) {
-          setLerp(-1, scaled);
-          setLerp(0, 1 - scaled);
-        } else {
-          setLerp(0, scaled - 1);
-          setLerp(-1, 1 - scaled);
-        }
-      }
-      print(_titlesProps);
+      for (var title in widget.titles) _titlesProps[title]["lerp"] = 0.0;
+      setLerp(pageFloor + 1, _pageController.page - pageFloor);
+      setLerp(pageFloor, 1 - (_pageController.page - pageFloor));
     });
   }
 
@@ -110,9 +83,9 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
           backgroundColor: widget.backgroundColorNav,
           child: _buildScrollTitles()),
       body: PageView(
-          children: widget.pages,
-          controller: _pageController,
-          onPageChanged: (index) => _onChangePageIndex(index)),
+        controller: _pageController,
+        children: widget.pages,
+      ),
       backgroundColor: widget.backgroundColorBody != null
           ? widget.backgroundColorBody
           : Colors.grey[100],
