@@ -27,14 +27,13 @@ class TitleScrollNavigation extends StatefulWidget {
   /// with the existing indexes and the total number of Nav Items
   final int initialPage;
 
-  final Color activeColor;
-  final Color desactiveColor;
-  final double paddingBetween;
-  final Color identifierColor;
-
   final double titleSize;
+  final double paddingBetween;
   final bool titleBold;
 
+  final Color activeColor;
+  final Color desactiveColor;
+  final Color identifierColor;
   final Color backgroundColorNav, backgroundColorBody;
 
   @override
@@ -52,12 +51,19 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
 
   @override
   void initState() {
+    createLerp();
+    setLerp(widget.initialPage, 1.0);
     _pageController = PageController(initialPage: widget.initialPage);
     _pageController.addListener(_scrollListener);
-    for (var title in widget.titles)
-      _titlesProps[title] = {"lerp": 0.0, "width": 0.0};
-    setLerp(widget.initialPage, 1.0);
     super.initState();
+  }
+
+  void createLerp() {
+    for (var title in widget.titles) _titlesProps[title] = {"lerp": 0.0};
+  }
+
+  void clearLerp() {
+    for (var title in widget.titles) _titlesProps[title]["lerp"] = 0.0;
   }
 
   void setLerp(int index, double result) {
@@ -70,7 +76,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
       _scroll["position"] = _pageController.position.pixels;
       _scroll["min"] = _pageController.position.minScrollExtent;
       _scroll["max"] = _pageController.position.maxScrollExtent;
-      for (var title in widget.titles) _titlesProps[title]["lerp"] = 0.0;
+      clearLerp();
       setLerp(pageFloor + 1, _pageController.page - pageFloor);
       setLerp(pageFloor, 1 - (_pageController.page - pageFloor));
     });
@@ -82,14 +88,11 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
       appBar: preferredSafeArea(
           backgroundColor: widget.backgroundColorNav,
           child: _buildScrollTitles()),
-      body: PageView(
-        controller: _pageController,
-        children: widget.pages,
-      ),
+      resizeToAvoidBottomPadding: false,
+      body: PageView(controller: _pageController, children: widget.pages),
       backgroundColor: widget.backgroundColorBody != null
           ? widget.backgroundColorBody
           : Colors.grey[100],
-      resizeToAvoidBottomPadding: false,
     );
   }
 
@@ -118,9 +121,6 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   }
 
   Row minRow(List<Widget> children) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: children,
-    );
+    return Row(mainAxisSize: MainAxisSize.min, children: children);
   }
 }
