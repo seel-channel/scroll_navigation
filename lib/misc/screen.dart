@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+///Returns a Preferred Size widget for an AppBar,
+///allowing to display content below the statusbar of the device
 PreferredSize preferredSafeArea({
   Widget child,
   Color backgroundColor = Colors.white,
