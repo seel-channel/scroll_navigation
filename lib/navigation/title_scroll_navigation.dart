@@ -8,7 +8,7 @@ class TitleScrollNavigation extends StatefulWidget {
     @required this.titles,
     @required this.pages,
     this.initialPage = 0,
-    this.titleSize = 14.0,
+    this.titleSize = 16.0,
     this.paddingBetween = 10.0,
     this.titleBold = true,
     this.activeColor = Colors.blue,
@@ -49,12 +49,15 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   Duration _animationDuration = Duration(milliseconds: 400);
   Map<String, double> _identifier = {"position": 0.0, "width": 1.0};
   Map<String, double> _scroll = {"position": 0.0, "max": 0.0, "min": 1.0};
-  List<Map<String, double>> _titlesProps = List();
+  Map<String, Map<String, dynamic>> _titlesProps = Map();
 
   @override
   void initState() {
     _pageController = PageController(initialPage: widget.initialPage);
     _pageController.addListener(_scrollListener);
+    for (var title in widget.titles) {
+      _titlesProps[title] = {"lerp": 0.0, "width": 0.0};
+    }
     super.initState();
   }
 
@@ -69,15 +72,34 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
         (_scroll["position"] - (_scrollScale * _bottomSelectedIndex + 1)) /
             _scrollScale;
 
+    void setLerp(int index, double result) {
+      _titlesProps[widget.titles[_bottomSelectedIndex + index]]["lerp"] =
+          result;
+    }
+
     setState(() {
       _scroll["position"] = _pageController.position.pixels;
       _scroll["min"] = _pageController.position.minScrollExtent;
       _scroll["max"] = _pageController.position.maxScrollExtent;
 
-      if (direction == ScrollDirection.reverse)
-        _scroll["directionScaled"] = scaled > 0 ? scaled : scaled + 1;
-      else
-        _scroll["directionScaled"] = (scaled > 0 ? scaled : scaled + 1) * -1;
+      if (direction == ScrollDirection.reverse) {
+        if (scaled > 0) {
+          setLerp(0, scaled);
+          setLerp(-1, 1 - scaled);
+        } else {
+          setLerp(1, scaled + 1);
+          setLerp(0, 1 - scaled);
+        }
+      } else {
+        if (scaled > 0) {
+          setLerp(-1, scaled);
+          setLerp(0, 1 - scaled);
+        } else {
+          setLerp(0, scaled - 1);
+          setLerp(-1, 1 - scaled);
+        }
+      }
+      print(_titlesProps);
     });
   }
 
@@ -104,7 +126,17 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
       child: minRow([
         ...widget.titles.map((title) {
           return minRow([
-            Text(title, maxLines: 1),
+            Text(
+              title,
+              maxLines: 1,
+              style: TextStyle(
+                color: Color.lerp(widget.desactiveColor, widget.activeColor,
+                    _titlesProps[title]["lerp"]),
+                fontWeight:
+                    widget.titleBold ? FontWeight.bold : FontWeight.normal,
+                fontSize: widget.titleSize,
+              ),
+            ),
             SizedBox(width: widget.paddingBetween),
           ]);
         })
