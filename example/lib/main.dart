@@ -79,11 +79,21 @@ class _HomePageState extends State<HomePage> {
       title: title("New Home"),
       leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
       body: TitleScrollNavigation(
-        titles: ["Page 1", "New page 2", "Thrid page 3"],
+        titles: [
+          "Page 1",
+          "New page 1",
+          "Old page 1",
+          "Page 2",
+          "New page 2",
+          "Old page 2",
+        ],
         pages: [
           Container(color: Colors.blue[50]),
           Container(color: Colors.red[50]),
-          Container(color: Colors.yellow[50])
+          Container(color: Colors.yellow[50]),
+          Container(color: Colors.green[50]),
+          Container(color: Colors.orange[50]),
+          Container(color: Colors.grey[50]),
         ],
       ),
     );
