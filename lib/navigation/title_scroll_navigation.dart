@@ -41,12 +41,8 @@ class TitleScrollNavigation extends StatefulWidget {
 }
 
 class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
-  bool _itemTapped = false;
   PageController _pageController;
-  Cubic _animationCurve = Curves.linearToEaseOut;
-  Duration _animationDuration = Duration(milliseconds: 400);
   Map<String, double> _identifier = {"position": 0.0, "width": 1.0};
-  Map<String, double> _scroll = {"position": 0.0, "max": 0.0, "min": 1.0};
   Map<String, Map<String, dynamic>> _titlesProps = Map();
 
   @override
@@ -55,30 +51,62 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
     setLerp(widget.initialPage, 1.0);
     _pageController = PageController(initialPage: widget.initialPage);
     _pageController.addListener(_scrollListener);
+    WidgetsBinding.instance.addPostFrameCallback((_) => setTitleWidth());
     super.initState();
   }
 
   void createLerp() {
-    for (var title in widget.titles) _titlesProps[title] = {"lerp": 0.0};
+    for (var title in widget.titles)
+      _titlesProps[title] = {"lerp": 0.0, "key": GlobalKey()};
   }
 
   void clearLerp() {
     for (var title in widget.titles) _titlesProps[title]["lerp"] = 0.0;
   }
 
+  double getProps(int index, String prop) {
+    return _titlesProps[widget.titles[index]][prop];
+  }
+
   void setLerp(int index, double result) {
     _titlesProps[widget.titles[index]]["lerp"] = result;
   }
 
+  void setTitleWidth() {
+    setState(() {
+      for (var title in widget.titles) {
+        double width = _titlesProps[title]["key"].currentContext.size.width;
+        _titlesProps[title]["width"] = width;
+      }
+      _identifier["width"] = getProps(widget.initialPage, "width");
+    });
+  }
+
+  double setIdentifierWidth(double index) {
+    return getProps(index.floor(), "width") +
+        (getProps(index.round(), "width") - getProps(index.floor(), "width")) *
+            (index - index.floor());
+  }
+
+  double setIdentifierPosition(double index) {
+    double position = 0;
+    double widthPadding(int i) => getProps(i, "width") + widget.paddingBetween;
+    for (var i = 0; i < index.floor(); i++) {
+      position += widthPadding(i);
+    }
+    return position + widthPadding(index.floor()) * (index - index.floor());
+  }
+
   void _scrollListener() {
     int pageFloor = _pageController.page.floor();
+    double pageDecimal = _pageController.page - pageFloor;
+
     setState(() {
-      _scroll["position"] = _pageController.position.pixels;
-      _scroll["min"] = _pageController.position.minScrollExtent;
-      _scroll["max"] = _pageController.position.maxScrollExtent;
+      _identifier["width"] = setIdentifierWidth(_pageController.page);
+      _identifier["position"] = setIdentifierPosition(_pageController.page);
       clearLerp();
-      setLerp(pageFloor + 1, _pageController.page - pageFloor);
-      setLerp(pageFloor, 1 - (_pageController.page - pageFloor));
+      setLerp(pageFloor + 1, pageDecimal);
+      setLerp(pageFloor, 1 - pageDecimal);
     });
   }
 
@@ -99,23 +127,34 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   SingleChildScrollView _buildScrollTitles() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: minRow([
-        ...widget.titles.map((title) {
-          return minRow([
-            Text(
-              title,
-              maxLines: 1,
-              style: TextStyle(
-                color: Color.lerp(widget.desactiveColor, widget.activeColor,
-                    _titlesProps[title]["lerp"]),
-                fontWeight:
-                    widget.titleBold ? FontWeight.bold : FontWeight.normal,
-                fontSize: widget.titleSize,
+      child: Stack(children: [
+        minRow([
+          ...widget.titles.map((title) {
+            return minRow([
+              Text(
+                title,
+                key: _titlesProps[title]["key"],
+                maxLines: 1,
+                style: TextStyle(
+                  color: Color.lerp(widget.desactiveColor, widget.activeColor,
+                      _titlesProps[title]["lerp"]),
+                  fontWeight:
+                      widget.titleBold ? FontWeight.bold : FontWeight.normal,
+                  fontSize: widget.titleSize,
+                ),
               ),
-            ),
-            SizedBox(width: widget.paddingBetween),
-          ]);
-        })
+              SizedBox(width: widget.paddingBetween),
+            ]);
+          })
+        ]),
+        AnimatedPositioned(
+          bottom: 0,
+          height: 3.0,
+          width: _identifier["width"],
+          left: _identifier["position"],
+          duration: Duration(milliseconds: 50),
+          child: Container(color: widget.identifierColor),
+        ),
       ]),
     );
   }
