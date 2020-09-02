@@ -6,6 +6,7 @@ PreferredSize preferredSafeArea({
   Widget child,
   Color backgroundColor = Colors.white,
   double heightMultiplicator = 1,
+  double elevation = 3,
 }) {
   return PreferredSize(
     preferredSize: Size.fromHeight(kToolbarHeight * heightMultiplicator),
@@ -17,7 +18,7 @@ PreferredSize preferredSafeArea({
             color: Colors.grey.withOpacity(0.3),
             spreadRadius: -3,
             blurRadius: 2,
-            offset: Offset(0, 3),
+            offset: Offset(0, elevation),
           ),
         ],
       ),
@@ -62,6 +63,7 @@ class Screen extends StatelessWidget {
     this.centerTitle = true,
     this.backgroundColor = Colors.white,
     this.heightMultiplicator = 1.5,
+    this.elevation = 3.0,
   }) : super(key: key);
 
   ///It is the body of the Scaffold, you can place any Widget.
@@ -95,6 +97,9 @@ class Screen extends StatelessWidget {
   ///It is used to give more space, padding or separation to the AppBar.
   final double heightMultiplicator;
 
+  ///Boxshadow Y-Offset. If 0 don't show the BoxShadow
+  final double elevation;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,6 +114,7 @@ class Screen extends StatelessWidget {
     double paddingConst =
         MediaQuery.of(context).size.width * 0.05 * heightMultiplicator;
     return preferredSafeArea(
+      elevation: elevation,
       backgroundColor: backgroundColor,
       heightMultiplicator: heightMultiplicator,
       child: Padding(

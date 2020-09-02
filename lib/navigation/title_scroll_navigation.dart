@@ -11,6 +11,7 @@ class TitleScrollNavigation extends StatefulWidget {
     this.titleSize = 16.0,
     this.titleBold = true,
     this.padding,
+    this.elevation = 3.0,
     this.identifierWithBorder = false,
     this.identifierColor = Colors.blue,
     this.activeColor = Colors.blue,
@@ -35,6 +36,9 @@ class TitleScrollNavigation extends StatefulWidget {
   final bool titleBold;
 
   final double titleSize;
+
+  ///Boxshadow Y-Offset. If 0 don't show the BoxShadow
+  final double elevation;
 
   final Color activeColor;
   final Color desactiveColor;
@@ -123,6 +127,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: preferredSafeArea(
+          elevation: widget.elevation,
           backgroundColor: widget.backgroundColorNav,
           child: _buildScrollTitles()),
       resizeToAvoidBottomPadding: false,

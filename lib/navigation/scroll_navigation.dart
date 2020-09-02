@@ -24,6 +24,7 @@ class ScrollNavigation extends StatefulWidget {
     this.desactiveColor = Colors.grey,
     this.backgroundColorBody,
     this.backgroundColorNav = Colors.white,
+    this.elevation = 3.0,
   }) : super(key: key);
 
   /// It is the initial page that will show. The value must match
@@ -67,6 +68,9 @@ class ScrollNavigation extends StatefulWidget {
   ///Mostrará el identificador, en la parte inferior, si no en la parte superior
   ///de la barra de navegación
   final bool identifierOnBottom;
+
+  ///Boxshadow Y-Offset. If 0 don't show the BoxShadow
+  final double elevation;
 
   final Color backgroundColorNav, backgroundColorBody;
 
@@ -168,6 +172,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
       child: Scaffold(
         appBar: widget.navigationOnTop
             ? preferredSafeArea(
+                elevation: widget.elevation,
                 backgroundColor: widget.backgroundColorNav,
                 child: _buildBottomNavigation(context, elevation: 0))
             : null,
@@ -178,8 +183,9 @@ class ScrollNavigationState extends State<ScrollNavigation> {
         backgroundColor: widget.backgroundColorBody != null
             ? widget.backgroundColorBody
             : Colors.grey[100],
-        bottomNavigationBar:
-            !widget.navigationOnTop ? _buildBottomNavigation(context) : null,
+        bottomNavigationBar: !widget.navigationOnTop
+            ? _buildBottomNavigation(context, elevation: widget.elevation * 4)
+            : null,
         floatingActionButton: _pagesActionButtons[_bottomSelectedIndex],
         resizeToAvoidBottomPadding: false,
       ),
