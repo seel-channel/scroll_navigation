@@ -9,7 +9,7 @@ class TitleScrollNavigation extends StatefulWidget {
     @required this.pages,
     this.initialPage = 0,
     this.titleSize = 16.0,
-    this.paddingBetween = 10.0,
+    this.padding,
     this.titleBold = true,
     this.activeColor = Colors.blue,
     this.desactiveColor = Colors.grey,
@@ -28,10 +28,10 @@ class TitleScrollNavigation extends StatefulWidget {
   final int initialPage;
 
   final double titleSize;
-  final double paddingBetween;
   final bool titleBold;
 
   final Color activeColor;
+  final TitleScrollPadding padding;
   final Color desactiveColor;
   final Color identifierColor;
   final Color backgroundColorNav, backgroundColorBody;
@@ -41,8 +41,9 @@ class TitleScrollNavigation extends StatefulWidget {
 }
 
 class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
+  TitleScrollPadding _padding;
   PageController _pageController;
-  Map<String, double> _identifier = {"position": 0.0, "width": 1.0};
+  Map<String, double> _identifier = Map();
   Map<String, Map<String, dynamic>> _titlesProps = Map();
 
   @override
@@ -51,6 +52,9 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
     _setLerp(widget.initialPage, 1.0);
     _pageController = PageController(initialPage: widget.initialPage);
     _pageController.addListener(_scrollListener);
+    widget.padding == null
+        ? _padding = TitleScrollPadding()
+        : _padding = widget.padding;
     WidgetsBinding.instance.addPostFrameCallback((_) => _setTitleWidth());
     super.initState();
   }
@@ -90,7 +94,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
 
   double _getIdentifierPosition(double index) {
     double position = 0;
-    double widthPadding(int i) => _getProps(i, "width") + widget.paddingBetween;
+    double widthPadding(i) => _getProps(i, "width") + _padding.betweenTitles;
     for (var i = 0; i < index.floor(); i++) position += widthPadding(i);
     return position + widthPadding(index.floor()) * (index - index.floor());
   }
@@ -125,6 +129,11 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   SingleChildScrollView _buildScrollTitles() {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      padding: EdgeInsets.only(
+          left: _padding.left,
+          top: _padding.top,
+          right: _padding.right,
+          bottom: _padding.bottom),
       child: Stack(children: [
         minRow([
           ...widget.titles.map((title) {
@@ -141,7 +150,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
                   fontSize: widget.titleSize,
                 ),
               ),
-              SizedBox(width: widget.paddingBetween),
+              SizedBox(width: _padding.betweenTitles),
             ]);
           })
         ]),
@@ -160,4 +169,44 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   Row minRow(List<Widget> children) {
     return Row(mainAxisSize: MainAxisSize.min, children: children);
   }
+}
+
+class TitleScrollPadding {
+  /// Creates insets with only the given values non-zero.
+  ///
+  /// {@tool snippet}
+  ///
+  /// Left margin indent of 40 pixels:
+  ///
+  /// ```dart
+  /// const TitleScrollPadding(left: 40.0)
+  /// ```
+  /// {@end-tool}
+  TitleScrollPadding({
+    this.left = 5.0,
+    this.top = 5.0,
+    this.right = 5.0,
+    this.bottom = 5.0,
+    this.betweenTitles = 20,
+  });
+
+  /// Creates insets where all the offsets are `value`.
+  ///
+  /// {@tool snippet}
+  ///
+  /// Typical eight-pixel margin on all sides:
+  ///
+  /// ```dart
+  /// const TitleScrollPadding.all(8.0)
+  /// ```
+  /// {@end-tool}
+  TitleScrollPadding.all(double amount, {this.betweenTitles = 20}) {
+    left = amount;
+    right = amount;
+    top = amount;
+    bottom = amount;
+  }
+
+  final double betweenTitles;
+  double left, right, top, bottom;
 }
