@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:scroll_navigation/misc/screen.dart';
 
-/// It is a navigation that will allow you to scroll from right to left with gestures
-/// and also when pressing an item in the Nav Item.
-///
-/// You need 2 elements: Pages and NavItems.
-///
-/// Pages and NavItems must have the same number of elements.
 class ScrollNavigation extends StatefulWidget {
+  /// It is a navigation that will allow you to scroll from right to left with gestures
+  /// and also when pressing an item in the Nav Item.
+  ///
+  /// You need 2 elements: Pages and NavItems.
+  ///
+  /// Pages and NavItems must have the same number of elements.
   ScrollNavigation({
     Key key,
     @required this.pages,

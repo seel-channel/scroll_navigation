@@ -26,9 +26,9 @@ PreferredSize preferredSafeArea({
   );
 }
 
-///It's a simple icon that serves as a return button,
-///It's function is to close the context.
 class ScreenReturnButton extends StatelessWidget {
+  ///It's a simple icon that serves as a return button,
+  ///It's function is to close the context.
   const ScreenReturnButton({Key key, this.size = 24, this.color = Colors.grey})
       : super(key: key);
 
@@ -47,10 +47,10 @@ class ScreenReturnButton extends StatelessWidget {
   }
 }
 
-// It is a Widget very similar to a Scaffold, in a way, it uses the
-///Scaffold core, but fixes some problems the Scaffold has with the
-///ScrollNavigation.
 class Screen extends StatelessWidget {
+// It is a Widget very similar to a Scaffold, in a way, it uses the
+  ///Scaffold core, but fixes some problems the Scaffold has with the
+  ///ScrollNavigation.
   Screen({
     Key key,
     this.body,
