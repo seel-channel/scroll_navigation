@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:scroll_navigation/misc/screen.dart';
+import 'package:scroll_navigation/misc/navigation_helpers.dart';
 
 class TitleScrollNavigation extends StatefulWidget {
   TitleScrollNavigation({
@@ -8,8 +9,7 @@ class TitleScrollNavigation extends StatefulWidget {
     @required this.titles,
     @required this.pages,
     this.initialPage = 0,
-    this.titleSize = 16.0,
-    this.titleBold = true,
+    this.titleStyle,
     this.padding,
     this.elevation = 3.0,
     this.identifierWithBorder = false,
@@ -33,9 +33,7 @@ class TitleScrollNavigation extends StatefulWidget {
 
   final bool identifierWithBorder;
 
-  final bool titleBold;
-
-  final double titleSize;
+  final TextStyle titleStyle;
 
   ///Boxshadow Y-Offset. If 0 don't show the BoxShadow
   final double elevation;
@@ -169,15 +167,12 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
                       widget.titles[title.key],
                       key: _titlesProps[title.value]["key"],
                       maxLines: 1,
-                      style: TextStyle(
+                      style: lerpTitleStyle(
+                        style: widget.titleStyle,
                         color: Color.lerp(
                             widget.desactiveColor,
                             widget.activeColor,
                             _titlesProps[title.value]["lerp"]),
-                        fontWeight: widget.titleBold
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        fontSize: widget.titleSize,
                       ),
                     ),
                   ),
@@ -208,44 +203,4 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
       ),
     );
   }
-}
-
-class TitleScrollPadding {
-  /// Creates insets with only the given values non-zero.
-  ///
-  /// {@tool snippet}
-  ///
-  /// Left margin indent of 40 pixels:
-  ///
-  /// ```dart
-  /// const TitleScrollPadding(left: 40.0)
-  /// ```
-  /// {@end-tool}
-  TitleScrollPadding({
-    this.left = 10.0,
-    this.top = 10.0,
-    this.right = 10.0,
-    this.bottom = 10.0,
-    this.betweenTitles = 20,
-  });
-
-  /// Creates insets where all the offsets are `value`.
-  ///
-  /// {@tool snippet}
-  ///
-  /// Typical eight-pixel margin on all sides:
-  ///
-  /// ```dart
-  /// const TitleScrollPadding.all(8.0)
-  /// ```
-  /// {@end-tool}
-  TitleScrollPadding.all(double amount, {this.betweenTitles = 20}) {
-    left = amount;
-    right = amount;
-    top = amount;
-    bottom = amount;
-  }
-
-  final double betweenTitles;
-  double left, right, top, bottom;
 }
