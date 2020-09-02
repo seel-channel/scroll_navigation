@@ -11,7 +11,6 @@ class TitleScrollNavigation extends StatefulWidget {
     this.titleSize = 16.0,
     this.titleBold = true,
     this.padding,
-    this.center = false,
     this.identifierWithBorder = false,
     this.identifierColor = Colors.blue,
     this.activeColor = Colors.blue,
@@ -32,7 +31,7 @@ class TitleScrollNavigation extends StatefulWidget {
   final TitleScrollPadding padding;
 
   final bool identifierWithBorder;
-  final bool center;
+
   final bool titleBold;
 
   final double titleSize;
@@ -135,67 +134,57 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   }
 
   Widget _buildScrollTitles() {
-    return Row(
-      mainAxisAlignment:
-          widget.center ? MainAxisAlignment.center : MainAxisAlignment.start,
-      children: [
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Stack(
-            children: [
-              Padding(
-                padding: EdgeInsets.only(
-                    left: _padding.left,
-                    top: _padding.top,
-                    right: _padding.right,
-                    bottom: _padding.bottom),
-                child: _minRow([
-                  ...widget.titles.map((title) {
-                    return _minRow([
-                      Text(
-                        title,
-                        key: _titlesProps[title]["key"],
-                        maxLines: 1,
-                        style: TextStyle(
-                          color: Color.lerp(widget.desactiveColor,
-                              widget.activeColor, _titlesProps[title]["lerp"]),
-                          fontWeight: widget.titleBold
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          fontSize: widget.titleSize,
-                        ),
-                      ),
-                      SizedBox(width: _padding.betweenTitles),
-                    ]);
-                  })
-                ]),
-              ),
-              AnimatedPositioned(
-                bottom: 0,
-                height: 3.0,
-                width: _identifier["width"],
-                left: _identifier["position"],
-                duration: Duration(milliseconds: 50),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: widget.identifierColor,
-                    borderRadius: widget.identifierWithBorder
-                        ? BorderRadius.only(
-                            topRight: Radius.circular(10.0),
-                            topLeft: Radius.circular(10.0))
-                        : null,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.only(
+                left: _padding.left,
+                top: _padding.top,
+                right: _padding.right,
+                bottom: _padding.bottom),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              ...widget.titles.map((title) {
+                return Row(mainAxisSize: MainAxisSize.min, children: [
+                  Text(
+                    title,
+                    key: _titlesProps[title]["key"],
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: Color.lerp(widget.desactiveColor,
+                          widget.activeColor, _titlesProps[title]["lerp"]),
+                      fontWeight: widget.titleBold
+                          ? FontWeight.bold
+                          : FontWeight.normal,
+                      fontSize: widget.titleSize,
+                    ),
                   ),
-                ),
-              ),
-            ],
+                  SizedBox(width: _padding.betweenTitles),
+                ]);
+              })
+            ]),
           ),
-        )
-      ],
+          AnimatedPositioned(
+            bottom: 0,
+            height: 3.0,
+            width: _identifier["width"],
+            left: _identifier["position"],
+            duration: Duration(milliseconds: 50),
+            child: Container(
+              decoration: BoxDecoration(
+                color: widget.identifierColor,
+                borderRadius: widget.identifierWithBorder
+                    ? BorderRadius.only(
+                        topRight: Radius.circular(10.0),
+                        topLeft: Radius.circular(10.0))
+                    : null,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
-  }
-
-  Row _minRow(List<Widget> children) {
-    return Row(mainAxisSize: MainAxisSize.min, children: children);
   }
 }
 
