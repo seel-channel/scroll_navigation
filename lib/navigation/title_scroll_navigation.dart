@@ -9,11 +9,12 @@ class TitleScrollNavigation extends StatefulWidget {
     @required this.pages,
     this.initialPage = 0,
     this.titleSize = 16.0,
-    this.padding,
     this.titleBold = true,
+    this.padding,
     this.activeColor = Colors.blue,
     this.desactiveColor = Colors.grey,
     this.identifierColor = Colors.blue,
+    this.identifierWithBorder = true,
     this.backgroundColorBody,
     this.backgroundColorNav = Colors.white,
   }) : super(key: key);
@@ -27,11 +28,14 @@ class TitleScrollNavigation extends StatefulWidget {
   /// with the existing indexes and the total number of Nav Items
   final int initialPage;
 
+  final TitleScrollPadding padding;
+
+  final bool identifierWithBorder;
+
   final double titleSize;
   final bool titleBold;
 
   final Color activeColor;
-  final TitleScrollPadding padding;
   final Color desactiveColor;
   final Color identifierColor;
   final Color backgroundColorNav, backgroundColorBody;
@@ -160,7 +164,16 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
           width: _identifier["width"],
           left: _identifier["position"],
           duration: Duration(milliseconds: 50),
-          child: Container(color: widget.identifierColor),
+          child: Container(
+            decoration: BoxDecoration(
+              color: widget.identifierColor,
+              borderRadius: widget.identifierWithBorder
+                  ? BorderRadius.only(
+                      topRight: Radius.circular(10.0),
+                      topLeft: Radius.circular(10.0))
+                  : BoxShape.rectangle,
+            ),
+          ),
         ),
       ]),
     );
