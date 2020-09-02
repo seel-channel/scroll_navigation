@@ -152,17 +152,26 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               ...widget.titles.map((title) {
                 return Row(mainAxisSize: MainAxisSize.min, children: [
-                  Text(
-                    title,
-                    key: _titlesProps[title]["key"],
-                    maxLines: 1,
-                    style: TextStyle(
-                      color: Color.lerp(widget.desactiveColor,
-                          widget.activeColor, _titlesProps[title]["lerp"]),
-                      fontWeight: widget.titleBold
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                      fontSize: widget.titleSize,
+                  GestureDetector(
+                    onTap: () async {
+                      await _pageController.animateToPage(
+                        widget.titles.indexOf(title),
+                        curve: Curves.linearToEaseOut,
+                        duration: Duration(milliseconds: 400),
+                      );
+                    },
+                    child: Text(
+                      title,
+                      key: _titlesProps[title]["key"],
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: Color.lerp(widget.desactiveColor,
+                            widget.activeColor, _titlesProps[title]["lerp"]),
+                        fontWeight: widget.titleBold
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        fontSize: widget.titleSize,
+                      ),
                     ),
                   ),
                   SizedBox(width: _padding.betweenTitles),
