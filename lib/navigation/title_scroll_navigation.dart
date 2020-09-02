@@ -47,53 +47,51 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
 
   @override
   void initState() {
-    createLerp();
-    setLerp(widget.initialPage, 1.0);
+    _createTitleProps();
+    _setLerp(widget.initialPage, 1.0);
     _pageController = PageController(initialPage: widget.initialPage);
     _pageController.addListener(_scrollListener);
-    WidgetsBinding.instance.addPostFrameCallback((_) => setTitleWidth());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _setTitleWidth());
     super.initState();
   }
 
-  void createLerp() {
+  void _createTitleProps() {
     for (var title in widget.titles)
       _titlesProps[title] = {"lerp": 0.0, "key": GlobalKey()};
   }
 
-  void clearLerp() {
+  void _clearLerp() {
     for (var title in widget.titles) _titlesProps[title]["lerp"] = 0.0;
   }
 
-  double getProps(int index, String prop) {
-    return _titlesProps[widget.titles[index]][prop];
-  }
-
-  void setLerp(int index, double result) {
+  void _setLerp(int index, double result) {
     _titlesProps[widget.titles[index]]["lerp"] = result;
   }
 
-  void setTitleWidth() {
+  void _setTitleWidth() {
     setState(() {
       for (var title in widget.titles) {
         double width = _titlesProps[title]["key"].currentContext.size.width;
         _titlesProps[title]["width"] = width;
       }
-      _identifier["width"] = getProps(widget.initialPage, "width");
+      _identifier["width"] = _getProps(widget.initialPage, "width");
     });
   }
 
-  double setIdentifierWidth(double index) {
-    return getProps(index.floor(), "width") +
-        (getProps(index.round(), "width") - getProps(index.floor(), "width")) *
-            (index - index.floor());
+  double _getProps(int index, String prop) {
+    return _titlesProps[widget.titles[index]][prop];
   }
 
-  double setIdentifierPosition(double index) {
+  double _getIdentifierWidth(double index) {
+    double indexDiff = index - index.floor();
+    double floorWidth({int sum = 0}) => _getProps(index.floor() + sum, "width");
+    return floorWidth() + (floorWidth(sum: 1) - floorWidth()) * indexDiff;
+  }
+
+  double _getIdentifierPosition(double index) {
     double position = 0;
-    double widthPadding(int i) => getProps(i, "width") + widget.paddingBetween;
-    for (var i = 0; i < index.floor(); i++) {
-      position += widthPadding(i);
-    }
+    double widthPadding(int i) => _getProps(i, "width") + widget.paddingBetween;
+    for (var i = 0; i < index.floor(); i++) position += widthPadding(i);
     return position + widthPadding(index.floor()) * (index - index.floor());
   }
 
@@ -102,11 +100,11 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
     double pageDecimal = _pageController.page - pageFloor;
 
     setState(() {
-      _identifier["width"] = setIdentifierWidth(_pageController.page);
-      _identifier["position"] = setIdentifierPosition(_pageController.page);
-      clearLerp();
-      setLerp(pageFloor + 1, pageDecimal);
-      setLerp(pageFloor, 1 - pageDecimal);
+      _identifier["width"] = _getIdentifierWidth(_pageController.page);
+      _identifier["position"] = _getIdentifierPosition(_pageController.page);
+      _clearLerp();
+      _setLerp(pageFloor + 1, pageDecimal);
+      _setLerp(pageFloor, 1 - pageDecimal);
     });
   }
 
