@@ -70,7 +70,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   }
 
   void _createTitleProps() {
-    for (var i = 0; i < widget.titles.length - 1; i++) {
+    for (int i = 0; i < widget.titles.length; i++) {
       String title = "${widget.titles[i]}$i";
       _titlesProps[title] = {"lerp": 0.0, "key": GlobalKey()};
       _titles.add(title);
