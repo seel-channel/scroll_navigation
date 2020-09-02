@@ -89,6 +89,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
   Cubic _animationCurve = Curves.linearToEaseOut;
   Duration _animationDuration = Duration(milliseconds: 400);
   Map<String, double> _identifier = Map();
+  List<Map<String, dynamic>> _itemProps = List();
 
   set goToPage(int index) => _onBottomItemTapped(index);
 
@@ -108,6 +109,9 @@ class ScrollNavigationState extends State<ScrollNavigation> {
             : _pagesActionButtons.add(null);
       }
     }
+    for (int i = 0; i < widget.navItems.length; i++)
+      _itemProps.add({"lerp": 0.0});
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       double navWidth = navigationKey.currentContext.size.width;
       double itemLenght = 1 / widget.navItems.length;
@@ -128,7 +132,6 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     super.dispose();
   }
 
-  //FUNCIONES
   Future<bool> _onPressBackButton() async {
     if (_popUpCache.length != 1) {
       _popUpCache.removeLast();
@@ -139,11 +142,13 @@ class ScrollNavigationState extends State<ScrollNavigation> {
       return true;
   }
 
-  void _onChangePageIndex(int index) {
-    setState(() {
-      if (_popUpCache.length > _maxItemsCache) _popUpCache.removeAt(0);
-      if (!_itemTapped) _popUpCache.add(index);
-    });
+  void _clearColorLerp() {
+    for (int i = 0; i < widget.navItems.length; i++)
+      _itemProps[i]["lerp"] = 0.0;
+  }
+
+  void _setColorLerp(int index, double result) {
+    _itemProps[index]["lerp"] = result;
   }
 
   void _onBottomItemTapped(int index) async {
@@ -167,6 +172,9 @@ class ScrollNavigationState extends State<ScrollNavigation> {
       if (page != page.round()) _bottomIndex = page.round();
       if (_identifierPhysics) {
         _identifier["position"] = _identifier["width"] * page;
+        if (_itemTapped) _clearColorLerp();
+        _setColorLerp(page.floor(), 1 - (page - page.floor()));
+        _setColorLerp(page.floor() + 1, page - page.floor());
       } else
         _identifier["position"] = _identifier["width"] * page.floor();
     });
@@ -186,12 +194,18 @@ class ScrollNavigationState extends State<ScrollNavigation> {
         body: PageView(
             children: widget.pages,
             controller: _pageController,
-            onPageChanged: (index) => _onChangePageIndex(index)),
+            onPageChanged: (index) {
+              setState(() {
+                if (_popUpCache.length > _maxItemsCache)
+                  _popUpCache.removeAt(0);
+                if (!_itemTapped) _popUpCache.add(index);
+              });
+            }),
         backgroundColor: widget.backgroundColorBody != null
             ? widget.backgroundColorBody
             : Colors.grey[100],
         bottomNavigationBar: !widget.navigationOnTop
-            ? _buildBottomNavigation(elevation: widget.elevation * 4)
+            ? _buildBottomNavigation(elevation: widget.elevation)
             : null,
         floatingActionButton: _pagesActionButtons[_bottomIndex],
         resizeToAvoidBottomPadding: false,
@@ -200,22 +214,37 @@ class ScrollNavigationState extends State<ScrollNavigation> {
   }
 
   //WIDGETS
-  Widget _buildBottomNavigation({double elevation = 14}) {
+  Widget _buildBottomNavigation({double elevation}) {
     return Stack(
       children: <Widget>[
-        BottomNavigationBar(
+        Container(
           key: navigationKey,
-          elevation: elevation,
-          selectedFontSize: 12.0,
-          currentIndex: _bottomIndex,
-          showSelectedLabels: widget.showNavItemsTitle,
-          showUnselectedLabels: widget.showNavItemsTitle,
-          selectedItemColor: widget.activeColor,
-          unselectedItemColor: widget.desactiveColor,
-          backgroundColor: widget.backgroundColorNav,
-          type: BottomNavigationBarType.fixed,
-          onTap: (index) => _onBottomItemTapped(index),
-          items: widget.navItems,
+          decoration: BoxDecoration(
+            color: widget.backgroundColorNav,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: -3,
+                blurRadius: 2,
+                offset: Offset(0, elevation),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              ...widget.navItems.asMap().entries.map((item) {
+                return Expanded(
+                  flex: ((1 / widget.navItems.length) * 100).round(),
+                  child: IconButton(
+                    color: Color.lerp(widget.desactiveColor, widget.activeColor,
+                        _itemProps[item.key]["lerp"]),
+                    icon: item.value.icon,
+                    onPressed: () => _onBottomItemTapped(item.key),
+                  ),
+                );
+              })
+            ],
+          ),
         ),
         if (widget.showIdentifier)
           AnimatedPositioned(

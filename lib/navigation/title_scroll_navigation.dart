@@ -50,6 +50,7 @@ class TitleScrollNavigation extends StatefulWidget {
 }
 
 class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
+  bool _itemTapped = false;
   List<String> _titles = List();
   TitleScrollPadding _padding;
   PageController _pageController;
@@ -77,7 +78,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
     }
   }
 
-  void _clearLerp() {
+  void _clearColorLerp() {
     for (var title in _titles) _titlesProps[title]["lerp"] = 0.0;
   }
 
@@ -121,7 +122,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
     setState(() {
       _identifier["width"] = _getIdentifierWidth(_pageController.page);
       _identifier["position"] = _getIdentifierPosition(_pageController.page);
-      _clearLerp();
+      if (_itemTapped) _clearColorLerp();
       _setColorLerp(currentPage + 1, pageDecimal);
       _setColorLerp(currentPage, 1 - pageDecimal);
     });
@@ -158,11 +159,11 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
                 return Row(mainAxisSize: MainAxisSize.min, children: [
                   GestureDetector(
                     onTap: () async {
-                      await _pageController.animateToPage(
-                        title.key,
-                        curve: Curves.linearToEaseOut,
-                        duration: Duration(milliseconds: 400),
-                      );
+                      setState(() => _itemTapped = true);
+                      await _pageController.animateToPage(title.key,
+                          curve: Curves.linearToEaseOut,
+                          duration: Duration(milliseconds: 400));
+                      setState(() => _itemTapped = false);
                     },
                     child: Text(
                       widget.titles[title.key],
