@@ -74,11 +74,13 @@ class _HomePageState extends State<HomePage> {
 
   Widget newHome() {
     return Screen(
+      elevation: 0,
       centerTitle: false,
       heightMultiplicator: 1,
       title: title("New Home"),
       leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
       body: TitleScrollNavigation(
+        elevation: 0,
         titles: [
           "Page 1",
           "New page 1",
