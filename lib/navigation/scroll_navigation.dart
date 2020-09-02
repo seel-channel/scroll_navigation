@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scroll_navigation/misc/screen.dart';
+import 'package:scroll_navigation/misc/navigation_helpers.dart';
 
 class ScrollNavigation extends StatefulWidget {
   /// It is a navigation that will allow you to scroll from right to left with gestures
@@ -15,7 +16,6 @@ class ScrollNavigation extends StatefulWidget {
     this.pagesActionButtons,
     this.initialPage = 0,
     this.navigationOnTop = false,
-    this.showNavItemsTitle = false,
     this.showIdentifier = true,
     this.identifierPhysics = true,
     this.identifierOnBottom = true,
@@ -49,7 +49,7 @@ class ScrollNavigation extends StatefulWidget {
 
   /// They are the list of elements that the menu will have.
   /// They must match the total number of pages.
-  final List<BottomNavigationBarItem> navItems;
+  final List<ScrollNavigationItem> navItems;
 
   /// When active, the indicator will move along with the scroll of the pages.
   /// Of other way, it will only move when you change page.
@@ -58,9 +58,6 @@ class ScrollNavigation extends StatefulWidget {
   /// It will show the identifier.
   /// If false, the argument [identifierPhysics] will be ignored
   final bool showIdentifier;
-
-  ///It will show the title of the navigation elements.
-  final bool showNavItemsTitle;
 
   ///If true show a circular border radius else show a simple rectangle.
   final bool identifierWithBorder;
@@ -235,11 +232,28 @@ class ScrollNavigationState extends State<ScrollNavigation> {
               ...widget.navItems.asMap().entries.map((item) {
                 return Expanded(
                   flex: ((1 / widget.navItems.length) * 100).round(),
-                  child: IconButton(
-                    color: Color.lerp(widget.desactiveColor, widget.activeColor,
-                        _itemProps[item.key]["lerp"]),
-                    icon: item.value.icon,
-                    onPressed: () => _onBottomItemTapped(item.key),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        color: Color.lerp(widget.desactiveColor,
+                            widget.activeColor, _itemProps[item.key]["lerp"]),
+                        icon: item.value.icon,
+                        onPressed: () => _onBottomItemTapped(item.key),
+                      ),
+                      if (item.value.title != null &&
+                          item.value.title.isNotEmpty)
+                        Text(
+                          item.value.title,
+                          style: lerpTitleStyle(
+                            style: widget.navItems[item.key].titleStyle,
+                            color: Color.lerp(
+                                widget.desactiveColor,
+                                widget.activeColor,
+                                _itemProps[item.key]["lerp"]),
+                          ),
+                        ),
+                    ],
                   ),
                 );
               })
