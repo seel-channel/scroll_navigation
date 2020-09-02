@@ -11,10 +11,11 @@ class TitleScrollNavigation extends StatefulWidget {
     this.titleSize = 16.0,
     this.titleBold = true,
     this.padding,
+    this.center = false,
+    this.identifierWithBorder = false,
+    this.identifierColor = Colors.blue,
     this.activeColor = Colors.blue,
     this.desactiveColor = Colors.grey,
-    this.identifierColor = Colors.blue,
-    this.identifierWithBorder = true,
     this.backgroundColorBody,
     this.backgroundColorNav = Colors.white,
   }) : super(key: key);
@@ -31,9 +32,10 @@ class TitleScrollNavigation extends StatefulWidget {
   final TitleScrollPadding padding;
 
   final bool identifierWithBorder;
+  final bool center;
+  final bool titleBold;
 
   final double titleSize;
-  final bool titleBold;
 
   final Color activeColor;
   final Color desactiveColor;
@@ -83,6 +85,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
         _titlesProps[title]["width"] = width;
       }
       _identifier["width"] = _getProps(widget.initialPage, "width");
+      _identifier["position"] = _padding.left;
     });
   }
 
@@ -98,9 +101,10 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
 
   double _getIdentifierPosition(double index) {
     double position = 0;
+    double indexDiff = index - index.floor();
     double widthPadding(i) => _getProps(i, "width") + _padding.betweenTitles;
     for (var i = 0; i < index.floor(); i++) position += widthPadding(i);
-    return position + widthPadding(index.floor()) * (index - index.floor());
+    return position + widthPadding(index.floor()) * indexDiff + _padding.left;
   }
 
   void _scrollListener() {
@@ -130,56 +134,67 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
     );
   }
 
-  SingleChildScrollView _buildScrollTitles() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.only(
-          left: _padding.left,
-          top: _padding.top,
-          right: _padding.right,
-          bottom: _padding.bottom),
-      child: Stack(children: [
-        minRow([
-          ...widget.titles.map((title) {
-            return minRow([
-              Text(
-                title,
-                key: _titlesProps[title]["key"],
-                maxLines: 1,
-                style: TextStyle(
-                  color: Color.lerp(widget.desactiveColor, widget.activeColor,
-                      _titlesProps[title]["lerp"]),
-                  fontWeight:
-                      widget.titleBold ? FontWeight.bold : FontWeight.normal,
-                  fontSize: widget.titleSize,
+  Widget _buildScrollTitles() {
+    return Row(
+      mainAxisAlignment:
+          widget.center ? MainAxisAlignment.center : MainAxisAlignment.start,
+      children: [
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Stack(
+            children: [
+              Padding(
+                padding: EdgeInsets.only(
+                    left: _padding.left,
+                    top: _padding.top,
+                    right: _padding.right,
+                    bottom: _padding.bottom),
+                child: _minRow([
+                  ...widget.titles.map((title) {
+                    return _minRow([
+                      Text(
+                        title,
+                        key: _titlesProps[title]["key"],
+                        maxLines: 1,
+                        style: TextStyle(
+                          color: Color.lerp(widget.desactiveColor,
+                              widget.activeColor, _titlesProps[title]["lerp"]),
+                          fontWeight: widget.titleBold
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          fontSize: widget.titleSize,
+                        ),
+                      ),
+                      SizedBox(width: _padding.betweenTitles),
+                    ]);
+                  })
+                ]),
+              ),
+              AnimatedPositioned(
+                bottom: 0,
+                height: 3.0,
+                width: _identifier["width"],
+                left: _identifier["position"],
+                duration: Duration(milliseconds: 50),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: widget.identifierColor,
+                    borderRadius: widget.identifierWithBorder
+                        ? BorderRadius.only(
+                            topRight: Radius.circular(10.0),
+                            topLeft: Radius.circular(10.0))
+                        : null,
+                  ),
                 ),
               ),
-              SizedBox(width: _padding.betweenTitles),
-            ]);
-          })
-        ]),
-        AnimatedPositioned(
-          bottom: 0,
-          height: 3.0,
-          width: _identifier["width"],
-          left: _identifier["position"],
-          duration: Duration(milliseconds: 50),
-          child: Container(
-            decoration: BoxDecoration(
-              color: widget.identifierColor,
-              borderRadius: widget.identifierWithBorder
-                  ? BorderRadius.only(
-                      topRight: Radius.circular(10.0),
-                      topLeft: Radius.circular(10.0))
-                  : BoxShape.rectangle,
-            ),
+            ],
           ),
-        ),
-      ]),
+        )
+      ],
     );
   }
 
-  Row minRow(List<Widget> children) {
+  Row _minRow(List<Widget> children) {
     return Row(mainAxisSize: MainAxisSize.min, children: children);
   }
 }
@@ -196,10 +211,10 @@ class TitleScrollPadding {
   /// ```
   /// {@end-tool}
   TitleScrollPadding({
-    this.left = 5.0,
-    this.top = 5.0,
-    this.right = 5.0,
-    this.bottom = 5.0,
+    this.left = 10.0,
+    this.top = 10.0,
+    this.right = 10.0,
+    this.bottom = 10.0,
     this.betweenTitles = 20,
   });
 
