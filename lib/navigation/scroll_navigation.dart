@@ -79,40 +79,45 @@ class ScrollNavigation extends StatefulWidget {
 }
 
 class ScrollNavigationState extends State<ScrollNavigation> {
+  int _bottomIndex = 0;
   int _maxItemsCache = 5;
-  int _bottomSelectedIndex;
   List<int> _popUpCache = List();
   List<Widget> _pagesActionButtons = List();
   PageController _pageController;
+  GlobalKey navigationKey = GlobalKey();
   bool _identifierPhysics, _itemTapped = false;
   Cubic _animationCurve = Curves.linearToEaseOut;
   Duration _animationDuration = Duration(milliseconds: 400);
-  Map<String, double> _identifier = {"position": 0.0, "width": 1.0};
-  Map<String, double> _scroll = {"position": 0.0, "max": 0.0, "min": 1.0};
+  Map<String, double> _identifier = Map();
 
-  set goToIndex(int index) => _onBottomItemTapped(index);
-  PageController get controller => _pageController;
+  set goToPage(int index) => _onBottomItemTapped(index);
 
   @override
   void initState() {
     _popUpCache.add(widget.initialPage);
-    _bottomSelectedIndex = widget.initialPage;
+    _bottomIndex = widget.initialPage;
     _identifierPhysics = widget.identifierPhysics;
-
     _pageController = PageController(initialPage: widget.initialPage);
-    if (_identifierPhysics && widget.showIdentifier) {
-      _pageController.addListener(_scrollListener);
-    }
-
-    if (widget.pagesActionButtons == null) {
+    if (widget.showIdentifier) _pageController.addListener(_scrollListener);
+    if (widget.pagesActionButtons == null)
       _pagesActionButtons = List.filled(widget.pages.length, null);
-    } else {
+    else {
       for (var i = 0; i < widget.pages.length + 1; i++) {
         i < widget.pagesActionButtons.length
             ? _pagesActionButtons.add(widget.pagesActionButtons[i])
             : _pagesActionButtons.add(null);
       }
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      double navWidth = navigationKey.currentContext.size.width;
+      double itemLenght = 1 / widget.navItems.length;
+      double width = navWidth * itemLenght;
+      setState(() {
+        _identifier["width"] = width;
+        _identifier["navWidth"] = navWidth;
+        _identifier["position"] = width * _bottomIndex;
+      });
+    });
     super.initState();
   }
 
@@ -136,14 +141,13 @@ class ScrollNavigationState extends State<ScrollNavigation> {
 
   void _onChangePageIndex(int index) {
     setState(() {
-      _bottomSelectedIndex = index;
       if (_popUpCache.length > _maxItemsCache) _popUpCache.removeAt(0);
       if (!_itemTapped) _popUpCache.add(index);
     });
   }
 
   void _onBottomItemTapped(int index) async {
-    if (_bottomSelectedIndex != index) {
+    if (_bottomIndex != index) {
       setState(() {
         _itemTapped = true;
         _popUpCache.add(index);
@@ -158,10 +162,13 @@ class ScrollNavigationState extends State<ScrollNavigation> {
   }
 
   void _scrollListener() {
+    double page = _pageController.page;
     setState(() {
-      _scroll["position"] = _pageController.position.pixels;
-      _scroll["min"] = _pageController.position.minScrollExtent;
-      _scroll["max"] = _pageController.position.maxScrollExtent;
+      if (page != page.round()) _bottomIndex = page.round();
+      if (_identifierPhysics) {
+        _identifier["position"] = _identifier["width"] * page;
+      } else
+        _identifier["position"] = _identifier["width"] * page.floor();
     });
   }
 
@@ -174,7 +181,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
             ? preferredSafeArea(
                 elevation: widget.elevation,
                 backgroundColor: widget.backgroundColorNav,
-                child: _buildBottomNavigation(context, elevation: 0))
+                child: _buildBottomNavigation(elevation: 0))
             : null,
         body: PageView(
             children: widget.pages,
@@ -184,46 +191,25 @@ class ScrollNavigationState extends State<ScrollNavigation> {
             ? widget.backgroundColorBody
             : Colors.grey[100],
         bottomNavigationBar: !widget.navigationOnTop
-            ? _buildBottomNavigation(context, elevation: widget.elevation * 4)
+            ? _buildBottomNavigation(elevation: widget.elevation * 4)
             : null,
-        floatingActionButton: _pagesActionButtons[_bottomSelectedIndex],
+        floatingActionButton: _pagesActionButtons[_bottomIndex],
         resizeToAvoidBottomPadding: false,
       ),
     );
   }
 
   //WIDGETS
-  Widget _buildBottomNavigation(BuildContext context, {double elevation = 14}) {
-    if (widget.showIdentifier) {
-      double navWidth = MediaQuery.of(context).size.width;
-      double itemLenght = 1 / widget.navItems.length;
-      double identifierWidth = navWidth * itemLenght;
-
-      setState(() => _identifier["width"] = identifierWidth);
-
-      if (_identifierPhysics) {
-        double positionScale =
-            _scroll["position"] / _scroll["max"] - _scroll["min"];
-        setState(() {
-          _identifier["position"] =
-              (navWidth - identifierWidth) * positionScale;
-
-          if (_identifier["position"].isNaN)
-            _identifier["position"] = identifierWidth * _bottomSelectedIndex;
-        });
-      } else {
-        setState(() =>
-            _identifier["position"] = identifierWidth * _bottomSelectedIndex);
-      }
-    }
+  Widget _buildBottomNavigation({double elevation = 14}) {
     return Stack(
       children: <Widget>[
         BottomNavigationBar(
+          key: navigationKey,
           elevation: elevation,
           selectedFontSize: 12.0,
+          currentIndex: _bottomIndex,
           showSelectedLabels: widget.showNavItemsTitle,
           showUnselectedLabels: widget.showNavItemsTitle,
-          currentIndex: _bottomSelectedIndex,
           selectedItemColor: widget.activeColor,
           unselectedItemColor: widget.desactiveColor,
           backgroundColor: widget.backgroundColorNav,
@@ -233,15 +219,15 @@ class ScrollNavigationState extends State<ScrollNavigation> {
         ),
         if (widget.showIdentifier)
           AnimatedPositioned(
-            bottom: widget.identifierOnBottom ? 0 : null,
+            height: 3.0,
+            width: _identifier["width"],
             left: _identifier["position"],
+            bottom: widget.identifierOnBottom ? 0 : null,
             duration: _identifierPhysics
                 ? Duration(milliseconds: 100)
                 : _animationDuration,
             curve: _animationCurve,
             child: Container(
-              height: 3.0,
-              width: _identifier["width"],
               decoration: BoxDecoration(
                 color: widget.activeColor,
                 borderRadius: widget.identifierWithBorder

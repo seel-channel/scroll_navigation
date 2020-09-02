@@ -115,15 +115,15 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   }
 
   void _scrollListener() {
-    int pageFloor = _pageController.page.floor();
-    double pageDecimal = _pageController.page - pageFloor;
+    int currentPage = _pageController.page.floor();
+    double pageDecimal = _pageController.page - currentPage;
 
     setState(() {
       _identifier["width"] = _getIdentifierWidth(_pageController.page);
       _identifier["position"] = _getIdentifierPosition(_pageController.page);
       _clearLerp();
-      _setColorLerp(pageFloor + 1, pageDecimal);
-      _setColorLerp(pageFloor, 1 - pageDecimal);
+      _setColorLerp(currentPage + 1, pageDecimal);
+      _setColorLerp(currentPage, 1 - pageDecimal);
     });
   }
 
