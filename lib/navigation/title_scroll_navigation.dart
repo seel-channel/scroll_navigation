@@ -50,6 +50,7 @@ class TitleScrollNavigation extends StatefulWidget {
 }
 
 class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
+  List<String> _titles = List();
   TitleScrollPadding _padding;
   PageController _pageController;
   Map<String, double> _identifier = Map();
@@ -58,7 +59,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   @override
   void initState() {
     _createTitleProps();
-    _setLerp(widget.initialPage, 1.0);
+    _setColorLerp(widget.initialPage, 1.0);
     _pageController = PageController(initialPage: widget.initialPage);
     _pageController.addListener(_scrollListener);
     widget.padding == null
@@ -69,21 +70,24 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   }
 
   void _createTitleProps() {
-    for (var title in widget.titles)
+    for (var i = 0; i < widget.titles.length - 1; i++) {
+      String title = "${widget.titles[i]}$i";
       _titlesProps[title] = {"lerp": 0.0, "key": GlobalKey()};
+      _titles.add(title);
+    }
   }
 
   void _clearLerp() {
-    for (var title in widget.titles) _titlesProps[title]["lerp"] = 0.0;
+    for (var title in _titles) _titlesProps[title]["lerp"] = 0.0;
   }
 
-  void _setLerp(int index, double result) {
-    _titlesProps[widget.titles[index]]["lerp"] = result;
+  void _setColorLerp(int index, double result) {
+    _titlesProps[_titles[index]]["lerp"] = result;
   }
 
   void _setTitleWidth() {
     setState(() {
-      for (var title in widget.titles) {
+      for (var title in _titles) {
         double width = _titlesProps[title]["key"].currentContext.size.width;
         _titlesProps[title]["width"] = width;
       }
@@ -93,7 +97,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   }
 
   double _getProps(int index, String prop) {
-    return _titlesProps[widget.titles[index]][prop];
+    return _titlesProps[_titles[index]][prop];
   }
 
   double _getIdentifierWidth(double index) {
@@ -118,8 +122,8 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
       _identifier["width"] = _getIdentifierWidth(_pageController.page);
       _identifier["position"] = _getIdentifierPosition(_pageController.page);
       _clearLerp();
-      _setLerp(pageFloor + 1, pageDecimal);
-      _setLerp(pageFloor, 1 - pageDecimal);
+      _setColorLerp(pageFloor + 1, pageDecimal);
+      _setColorLerp(pageFloor, 1 - pageDecimal);
     });
   }
 
@@ -150,23 +154,25 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
                 right: _padding.right,
                 bottom: _padding.bottom),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              ...widget.titles.map((title) {
+              ..._titles.asMap().entries.map((title) {
                 return Row(mainAxisSize: MainAxisSize.min, children: [
                   GestureDetector(
                     onTap: () async {
                       await _pageController.animateToPage(
-                        widget.titles.indexOf(title),
+                        title.key,
                         curve: Curves.linearToEaseOut,
                         duration: Duration(milliseconds: 400),
                       );
                     },
                     child: Text(
-                      title,
-                      key: _titlesProps[title]["key"],
+                      widget.titles[title.key],
+                      key: _titlesProps[title.value]["key"],
                       maxLines: 1,
                       style: TextStyle(
-                        color: Color.lerp(widget.desactiveColor,
-                            widget.activeColor, _titlesProps[title]["lerp"]),
+                        color: Color.lerp(
+                            widget.desactiveColor,
+                            widget.activeColor,
+                            _titlesProps[title.value]["lerp"]),
                         fontWeight: widget.titleBold
                             ? FontWeight.bold
                             : FontWeight.normal,
@@ -174,7 +180,8 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
                       ),
                     ),
                   ),
-                  SizedBox(width: _padding.betweenTitles),
+                  if (_titles.last != title.value)
+                    SizedBox(width: _padding.betweenTitles),
                 ]);
               })
             ]),
