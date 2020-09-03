@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 PreferredSize preferredSafeArea({
   Widget child,
   Color backgroundColor = Colors.white,
-  double heightMultiplicator = 1,
+  double height = 84,
   double elevation = 3,
 }) {
   return PreferredSize(
-    preferredSize: Size.fromHeight(kToolbarHeight * heightMultiplicator),
+    preferredSize: Size.fromHeight(height),
     child: Container(
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -62,7 +62,7 @@ class Screen extends StatelessWidget {
     this.showAppBar = true,
     this.centerTitle = true,
     this.backgroundColor = Colors.white,
-    this.heightMultiplicator = 1.5,
+    this.height = 84,
     this.elevation = 3.0,
   }) : super(key: key);
 
@@ -94,8 +94,8 @@ class Screen extends StatelessWidget {
   ///Color that customizes the AppBar.
   final Color backgroundColor;
 
-  ///It is used to give more space, padding or separation to the AppBar.
-  final double heightMultiplicator;
+  ///It is used to give the AppBar height.
+  final double height;
 
   ///Boxshadow Y-Offset. If 0 don't show the BoxShadow
   final double elevation;
@@ -111,12 +111,11 @@ class Screen extends StatelessWidget {
   }
 
   Widget appBar(BuildContext context) {
-    double paddingConst =
-        MediaQuery.of(context).size.width * 0.05 * heightMultiplicator;
+    double paddingConst = MediaQuery.of(context).size.width * 0.05;
     return preferredSafeArea(
       elevation: elevation,
       backgroundColor: backgroundColor,
-      heightMultiplicator: heightMultiplicator,
+      height: height,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: paddingConst),
         child: centerTitle
