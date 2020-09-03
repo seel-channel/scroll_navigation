@@ -21,24 +21,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final navigationKey = GlobalKey<ScrollNavigationState>();
+
   @override
   Widget build(BuildContext context) {
     return ScrollNavigation(
+      key: navigationKey,
       initialPage: 4,
       pages: [
         Screen(title: title("Camera")),
         Screen(title: title("Messages"), backgroundColor: Colors.red[50]),
-        Screen(
-          title: title("Favor"),
-          body: Container(color: Colors.cyan[50]),
-          showAppBar: false,
-        ),
+        Screen(title: title("Favor"), body: Container(color: Colors.cyan[50])),
         Screen(title: title("Activity"), backgroundColor: Colors.yellow[50]),
-        Screen(
-          title: title("Home"),
-          leftWidget: Icon(Icons.menu, color: Colors.grey),
-          rightWidget: Icon(Icons.favorite, color: Colors.grey),
-        )
+        Screen(title: title("Home"))
       ],
       navItems: [
         navItem(Icons.camera),
@@ -56,20 +51,20 @@ class _HomePageState extends State<HomePage> {
         ),
         null,
         FloatingActionButton(
-          onPressed: () => print("Cooler Daniel xd"),
-          child: Icon(Icons.sync),
+          onPressed: () => navigationKey.currentState.goToPage(4),
+          child: Icon(Icons.arrow_right),
         ),
         null,
         FloatingActionButton(
-          onPressed: () => print("Cool :)"),
-          child: Icon(Icons.add),
+          onPressed: () => navigationKey.currentState.goToPage(2),
+          child: Icon(Icons.arrow_left),
         ),
       ],
     );
   }
 
-  BottomNavigationBarItem navItem(IconData icon) {
-    return BottomNavigationBarItem(icon: Icon(icon), title: Text(""));
+  ScrollNavigationItem navItem(IconData icon) {
+    return ScrollNavigationItem(icon: Icon(icon));
   }
 
   Widget newHome() {
