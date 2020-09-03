@@ -89,7 +89,6 @@ class ScrollNavigationState extends State<ScrollNavigation> {
   PageController _pageController;
   GlobalKey navigationKey = GlobalKey();
   Cubic _animationCurve = Curves.linearToEaseOut;
-  Duration _animationDuration = Duration(milliseconds: 400);
   List<int> _popUpCache = List();
   Map<String, double> _identifier = Map();
   List<Widget> _pagesActionButtons = List();
@@ -143,7 +142,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
       });
       await _pageController.animateToPage(
         index,
-        duration: _animationDuration,
+        duration: Duration(milliseconds: 400),
         curve: _animationCurve,
       );
       setState(() => _itemTapped = false);
@@ -161,16 +160,20 @@ class ScrollNavigationState extends State<ScrollNavigation> {
 
   void _scrollListener() {
     double page = _pageController.page;
+    int currentPage = page.floor();
     setState(() {
-      if (page != page.round()) _bottomIndex = page.round();
       if (_identifierPhysics) {
-        _identifier["position"] = _identifier["width"] * page;
         if (_itemTapped) _clearColorLerp();
-        _setColorLerp(page.floor(), 1 - (page - page.floor()));
-        if (page.floor() + 1 < widget.pages.length)
-          _setColorLerp(page.floor() + 1, page - page.floor());
-      } else
-        _identifier["position"] = _identifier["width"] * page.floor();
+        if (currentPage + 1 < widget.pages.length)
+          _setColorLerp(currentPage + 1, (page - currentPage));
+        _setColorLerp(currentPage, 1 - (page - currentPage));
+        _identifier["position"] = _identifier["width"] * page;
+      } else {
+        _clearColorLerp();
+        _setColorLerp(page.round(), 1.0);
+        _identifier["position"] = _identifier["width"] * page.round();
+      }
+      _bottomIndex = page.round();
     });
   }
 
@@ -213,15 +216,14 @@ class ScrollNavigationState extends State<ScrollNavigation> {
       builder: (context, orientation) {
         if (_orientation == null || _orientation != orientation) {
           double navWidth = MediaQuery.of(context).size.width;
-          double itemLenght = 1 / widget.navItems.length;
-          double width = navWidth * itemLenght;
-
+          double width = navWidth * (1 / widget.navItems.length);
           _orientation = orientation;
           _identifier["width"] = width;
           _identifier["navWidth"] = navWidth;
           _identifier["position"] = width * _bottomIndex;
-          _setColorLerp(widget.initialPage, 1.0);
+          _setColorLerp(_bottomIndex, 1.0);
         }
+
         return Stack(
           children: <Widget>[
             Container(
@@ -284,7 +286,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
                 bottom: widget.identifierOnBottom ? 0 : null,
                 duration: _identifierPhysics
                     ? Duration(milliseconds: 0)
-                    : _animationDuration,
+                    : Duration(milliseconds: 200),
                 curve: _animationCurve,
                 child: Container(
                   decoration: BoxDecoration(
