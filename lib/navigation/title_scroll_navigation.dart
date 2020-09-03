@@ -118,10 +118,12 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
     double pageDecimal = _pageController.page - currentPage;
 
     setState(() {
-      _identifier["width"] = _getIdentifierWidth(_pageController.page);
-      _identifier["position"] = _getIdentifierPosition(_pageController.page);
       if (_itemTapped) _clearColorLerp();
-      _setColorLerp(currentPage + 1, pageDecimal);
+      if (currentPage + 1 < widget.pages.length) {
+        _identifier["width"] = _getIdentifierWidth(_pageController.page);
+        _identifier["position"] = _getIdentifierPosition(_pageController.page);
+        _setColorLerp(currentPage + 1, pageDecimal);
+      }
       _setColorLerp(currentPage, 1 - pageDecimal);
     });
   }
@@ -186,7 +188,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
             height: 3.0,
             width: _identifier["width"],
             left: _identifier["position"],
-            duration: Duration(milliseconds: 50),
+            duration: Duration(milliseconds: 0),
             child: Container(
               decoration: BoxDecoration(
                 color: widget.identifierColor,
