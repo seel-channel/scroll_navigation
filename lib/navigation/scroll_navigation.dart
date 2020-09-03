@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_navigation/misc/screen.dart';
 import 'package:scroll_navigation/misc/navigation_helpers.dart';
@@ -92,8 +93,8 @@ class ScrollNavigationState extends State<ScrollNavigation> {
 
   @override
   void initState() {
-    _popUpCache.add(widget.initialPage);
     _bottomIndex = widget.initialPage;
+    _popUpCache.add(widget.initialPage);
     _identifierPhysics = widget.identifierPhysics;
     _pageController = PageController(initialPage: widget.initialPage);
     if (widget.showIdentifier) _pageController.addListener(_scrollListener);
@@ -108,24 +109,13 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     }
     for (int i = 0; i < widget.navItems.length; i++)
       _itemProps.add({"lerp": 0.0});
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      double navWidth = navigationKey.currentContext.size.width;
-      double itemLenght = 1 / widget.navItems.length;
-      double width = navWidth * itemLenght;
-      setState(() {
-        _identifier["width"] = width;
-        _identifier["navWidth"] = navWidth;
-        _identifier["position"] = width * _bottomIndex;
-      });
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _createProps());
     super.initState();
   }
 
   @override
   void dispose() {
-    if (_identifierPhysics && widget.showIdentifier)
-      _pageController.removeListener(_scrollListener);
+    if (widget.showIdentifier) _pageController.removeListener(_scrollListener);
     super.dispose();
   }
 
@@ -137,15 +127,6 @@ class ScrollNavigationState extends State<ScrollNavigation> {
       return false;
     } else
       return true;
-  }
-
-  void _clearColorLerp() {
-    for (int i = 0; i < widget.navItems.length; i++)
-      _itemProps[i]["lerp"] = 0.0;
-  }
-
-  void _setColorLerp(int index, double result) {
-    _itemProps[index]["lerp"] = result;
   }
 
   void _onBottomItemTapped(int index) async {
@@ -161,6 +142,27 @@ class ScrollNavigationState extends State<ScrollNavigation> {
       );
       setState(() => _itemTapped = false);
     }
+  }
+
+  void _createProps() {
+    double navWidth = navigationKey.currentContext.size.width;
+    double itemLenght = 1 / widget.navItems.length;
+    double width = navWidth * itemLenght;
+    setState(() {
+      _identifier["width"] = width;
+      _identifier["navWidth"] = navWidth;
+      _identifier["position"] = width * _bottomIndex;
+      _setColorLerp(widget.initialPage, 1.0);
+    });
+  }
+
+  void _clearColorLerp() {
+    for (int i = 0; i < widget.navItems.length; i++)
+      _itemProps[i]["lerp"] = 0.0;
+  }
+
+  void _setColorLerp(int index, double result) {
+    _itemProps[index]["lerp"] = result;
   }
 
   void _scrollListener() {
@@ -202,7 +204,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
             ? widget.backgroundColorBody
             : Colors.grey[100],
         bottomNavigationBar: !widget.navigationOnTop
-            ? _buildBottomNavigation(elevation: widget.elevation)
+            ? _buildBottomNavigation(elevation: 1 - widget.elevation)
             : null,
         floatingActionButton: _pagesActionButtons[_bottomIndex],
         resizeToAvoidBottomPadding: false,
@@ -232,28 +234,33 @@ class ScrollNavigationState extends State<ScrollNavigation> {
               ...widget.navItems.asMap().entries.map((item) {
                 return Expanded(
                   flex: ((1 / widget.navItems.length) * 100).round(),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        color: Color.lerp(widget.desactiveColor,
-                            widget.activeColor, _itemProps[item.key]["lerp"]),
-                        icon: item.value.icon,
-                        onPressed: () => _onBottomItemTapped(item.key),
-                      ),
-                      if (item.value.title != null &&
-                          item.value.title.isNotEmpty)
-                        Text(
-                          item.value.title,
-                          style: lerpTitleStyle(
-                            style: widget.navItems[item.key].titleStyle,
+                  child: GestureDetector(
+                    onTap: () => _onBottomItemTapped(item.key),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconTheme.merge(
+                          data: IconThemeData(
                             color: Color.lerp(
                                 widget.desactiveColor,
                                 widget.activeColor,
                                 _itemProps[item.key]["lerp"]),
                           ),
+                          child: item.value.icon,
                         ),
-                    ],
+                        if (item.value.title != null &&
+                            item.value.title.isNotEmpty)
+                          Text(
+                            item.value.title,
+                            style: TextStyle(
+                              color: Color.lerp(
+                                  widget.desactiveColor,
+                                  widget.activeColor,
+                                  _itemProps[item.key]["lerp"]),
+                            ).merge(widget.navItems[item.key].titleStyle),
+                          ),
+                      ],
+                    ),
                   ),
                 );
               })
@@ -281,7 +288,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
                         : BorderRadius.only(
                             bottomRight: Radius.circular(10.0),
                             bottomLeft: Radius.circular(10.0))
-                    : BoxShape.rectangle,
+                    : null,
               ),
             ),
           ),

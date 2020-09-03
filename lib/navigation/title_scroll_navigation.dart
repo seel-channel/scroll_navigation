@@ -167,13 +167,12 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
                       widget.titles[title.key],
                       key: _titlesProps[title.value]["key"],
                       maxLines: 1,
-                      style: lerpTitleStyle(
-                        style: widget.titleStyle,
+                      style: TextStyle(
                         color: Color.lerp(
                             widget.desactiveColor,
                             widget.activeColor,
                             _titlesProps[title.value]["lerp"]),
-                      ),
+                      ).merge(widget.titleStyle),
                     ),
                   ),
                   if (_titles.last != title.value)
