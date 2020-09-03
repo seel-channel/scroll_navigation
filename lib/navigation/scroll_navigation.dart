@@ -25,6 +25,7 @@ class ScrollNavigation extends StatefulWidget {
     this.desactiveColor = Colors.grey,
     this.backgroundColorBody,
     this.backgroundColorNav = Colors.white,
+    this.verticalPadding = 20,
     this.elevation = 3.0,
   }) : super(key: key);
 
@@ -70,6 +71,9 @@ class ScrollNavigation extends StatefulWidget {
   ///Boxshadow Y-Offset. If 0 don't show the BoxShadow
   final double elevation;
 
+  ///It's the vertical padding that the navItem have.
+  final double verticalPadding;
+
   final Color backgroundColorNav, backgroundColorBody;
 
   @override
@@ -79,17 +83,20 @@ class ScrollNavigation extends StatefulWidget {
 class ScrollNavigationState extends State<ScrollNavigation> {
   int _bottomIndex = 0;
   int _maxItemsCache = 5;
-  List<int> _popUpCache = List();
-  List<Widget> _pagesActionButtons = List();
+  bool _identifierPhysics;
+  bool _itemTapped = false;
+  Orientation _orientation;
   PageController _pageController;
   GlobalKey navigationKey = GlobalKey();
-  bool _identifierPhysics, _itemTapped = false;
   Cubic _animationCurve = Curves.linearToEaseOut;
   Duration _animationDuration = Duration(milliseconds: 400);
+  List<int> _popUpCache = List();
   Map<String, double> _identifier = Map();
+  List<Widget> _pagesActionButtons = List();
   List<Map<String, dynamic>> _itemProps = List();
 
-  set goToPage(int index) => _onBottomItemTapped(index);
+  ///Go to a custom page :)
+  void goToPage(int index) => _onBottomItemTapped(index);
 
   @override
   void initState() {
@@ -109,7 +116,6 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     }
     for (int i = 0; i < widget.navItems.length; i++)
       _itemProps.add({"lerp": 0.0});
-    WidgetsBinding.instance.addPostFrameCallback((_) => _createProps());
     super.initState();
   }
 
@@ -144,18 +150,6 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     }
   }
 
-  void _createProps() {
-    double navWidth = navigationKey.currentContext.size.width;
-    double itemLenght = 1 / widget.navItems.length;
-    double width = navWidth * itemLenght;
-    setState(() {
-      _identifier["width"] = width;
-      _identifier["navWidth"] = navWidth;
-      _identifier["position"] = width * _bottomIndex;
-      _setColorLerp(widget.initialPage, 1.0);
-    });
-  }
-
   void _clearColorLerp() {
     for (int i = 0; i < widget.navItems.length; i++)
       _itemProps[i]["lerp"] = 0.0;
@@ -173,7 +167,8 @@ class ScrollNavigationState extends State<ScrollNavigation> {
         _identifier["position"] = _identifier["width"] * page;
         if (_itemTapped) _clearColorLerp();
         _setColorLerp(page.floor(), 1 - (page - page.floor()));
-        _setColorLerp(page.floor() + 1, page - page.floor());
+        if (page.floor() + 1 < widget.pages.length)
+          _setColorLerp(page.floor() + 1, page - page.floor());
       } else
         _identifier["position"] = _identifier["width"] * page.floor();
     });
@@ -214,85 +209,101 @@ class ScrollNavigationState extends State<ScrollNavigation> {
 
   //WIDGETS
   Widget _buildBottomNavigation({double elevation}) {
-    return Stack(
-      children: <Widget>[
-        Container(
-          key: navigationKey,
-          decoration: BoxDecoration(
-            color: widget.backgroundColorNav,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                spreadRadius: -3,
-                blurRadius: 2,
-                offset: Offset(0, elevation),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              ...widget.navItems.asMap().entries.map((item) {
-                return Expanded(
-                  flex: ((1 / widget.navItems.length) * 100).round(),
-                  child: GestureDetector(
-                    onTap: () => _onBottomItemTapped(item.key),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconTheme.merge(
-                          data: IconThemeData(
-                            color: Color.lerp(
-                                widget.desactiveColor,
-                                widget.activeColor,
-                                _itemProps[item.key]["lerp"]),
-                          ),
-                          child: item.value.icon,
-                        ),
-                        if (item.value.title != null &&
-                            item.value.title.isNotEmpty)
-                          Text(
-                            item.value.title,
-                            style: TextStyle(
-                              color: Color.lerp(
-                                  widget.desactiveColor,
-                                  widget.activeColor,
-                                  _itemProps[item.key]["lerp"]),
-                            ).merge(widget.navItems[item.key].titleStyle),
-                          ),
-                      ],
-                    ),
-                  ),
-                );
-              })
-            ],
-          ),
-        ),
-        if (widget.showIdentifier)
-          AnimatedPositioned(
-            height: 3.0,
-            width: _identifier["width"],
-            left: _identifier["position"],
-            bottom: widget.identifierOnBottom ? 0 : null,
-            duration: _identifierPhysics
-                ? Duration(milliseconds: 100)
-                : _animationDuration,
-            curve: _animationCurve,
-            child: Container(
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        if (_orientation == null || _orientation != orientation) {
+          double navWidth = MediaQuery.of(context).size.width;
+          double itemLenght = 1 / widget.navItems.length;
+          double width = navWidth * itemLenght;
+
+          _orientation = orientation;
+          _identifier["width"] = width;
+          _identifier["navWidth"] = navWidth;
+          _identifier["position"] = width * _bottomIndex;
+          _setColorLerp(widget.initialPage, 1.0);
+        }
+        return Stack(
+          children: <Widget>[
+            Container(
+              key: navigationKey,
+              padding: EdgeInsets.symmetric(vertical: widget.verticalPadding),
               decoration: BoxDecoration(
-                color: widget.activeColor,
-                borderRadius: widget.identifierWithBorder
-                    ? widget.identifierOnBottom
-                        ? BorderRadius.only(
-                            topRight: Radius.circular(10.0),
-                            topLeft: Radius.circular(10.0))
-                        : BorderRadius.only(
-                            bottomRight: Radius.circular(10.0),
-                            bottomLeft: Radius.circular(10.0))
-                    : null,
+                color: widget.backgroundColorNav,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: -3,
+                    blurRadius: 2,
+                    offset: Offset(0, elevation),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  ...widget.navItems.asMap().entries.map((item) {
+                    return Expanded(
+                      child: InkWell(
+                        onTap: () => _onBottomItemTapped(item.key),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconTheme.merge(
+                              data: IconThemeData(
+                                color: Color.lerp(
+                                    widget.desactiveColor,
+                                    widget.activeColor,
+                                    _itemProps[item.key]["lerp"]),
+                              ),
+                              child: item.value.icon,
+                            ),
+                            if (item.value.title != null &&
+                                item.value.title.isNotEmpty)
+                              Text(
+                                item.value.title,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: Color.lerp(
+                                      widget.desactiveColor,
+                                      widget.activeColor,
+                                      _itemProps[item.key]["lerp"]),
+                                ).merge(widget.navItems[item.key].titleStyle),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  })
+                ],
               ),
             ),
-          ),
-      ],
+            if (widget.showIdentifier)
+              AnimatedPositioned(
+                height: 3.0,
+                width: _identifier["width"],
+                left: _identifier["position"],
+                bottom: widget.identifierOnBottom ? 0 : null,
+                duration: _identifierPhysics
+                    ? Duration(milliseconds: 0)
+                    : _animationDuration,
+                curve: _animationCurve,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: widget.activeColor,
+                    borderRadius: widget.identifierWithBorder
+                        ? widget.identifierOnBottom
+                            ? BorderRadius.only(
+                                topRight: Radius.circular(10.0),
+                                topLeft: Radius.circular(10.0))
+                            : BorderRadius.only(
+                                bottomRight: Radius.circular(10.0),
+                                bottomLeft: Radius.circular(10.0))
+                        : null,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
