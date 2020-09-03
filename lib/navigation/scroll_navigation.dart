@@ -74,6 +74,7 @@ class ScrollNavigation extends StatefulWidget {
   ///It's the vertical padding that the navItem have.
   final double verticalPadding;
 
+  ///Colooooors :D
   final Color backgroundColorNav, backgroundColorBody;
 
   @override
@@ -94,7 +95,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
   List<Widget> _pagesActionButtons = List();
   List<Map<String, dynamic>> _itemProps = List();
 
-  ///Go to a custom page :)
+  ///Go to a page :)
   void goToPage(int index) => _onBottomItemTapped(index);
 
   @override

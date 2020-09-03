@@ -4,6 +4,11 @@ import 'package:scroll_navigation/misc/screen.dart';
 import 'package:scroll_navigation/misc/navigation_helpers.dart';
 
 class TitleScrollNavigation extends StatefulWidget {
+  ///It is a navigation that will only show texts [titles].
+  ///You can move with gestures or pressing any title.
+  ///
+  ///Also, the identifier will be adjusted to the text width
+  ///and will have a color interpolation between titles.
   TitleScrollNavigation({
     Key key,
     @required this.titles,
@@ -29,18 +34,28 @@ class TitleScrollNavigation extends StatefulWidget {
   /// with the existing indexes and the total number of Nav Items
   final int initialPage;
 
+  ///It's the padding will have the titles container and the padding between titles.
   final TitleScrollPadding padding;
 
+  ///If true, the identifier will have rounded corner; else, will show a rectangle.
   final bool identifierWithBorder;
 
+  ///It's the style than the titles will have.
   final TextStyle titleStyle;
 
   ///Boxshadow Y-Offset. If 0 don't show the BoxShadow
   final double elevation;
 
+  /// It is the color that the active title will show.
   final Color activeColor;
+
+  /// It is the color that the desactive title will show.
   final Color desactiveColor;
+
+  /// It is the color that the identifier will show.
   final Color identifierColor;
+
+  ///Colooooors :D
   final Color backgroundColorNav, backgroundColorBody;
 
   @override
@@ -55,6 +70,9 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   Map<String, double> _identifier = Map();
   Map<String, Map<String, dynamic>> _titlesProps = Map();
 
+  ///Go to a page :)
+  void goToPage(int index) => _titleTapped(index);
+
   @override
   void initState() {
     _createTitleProps();
@@ -66,6 +84,17 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
         : _padding = widget.padding;
     WidgetsBinding.instance.addPostFrameCallback((_) => _setTitleWidth());
     super.initState();
+  }
+
+  void _titleTapped(int index) async {
+    setState(() => _itemTapped = true);
+    await _pageController.animateToPage(index,
+        curve: Curves.linearToEaseOut, duration: Duration(milliseconds: 400));
+    setState(() {
+      _itemTapped = false;
+      _clearColorLerp();
+      _setColorLerp(_pageController.page.round(), 1.0);
+    });
   }
 
   void _createTitleProps() {
@@ -158,17 +187,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
               ..._titles.asMap().entries.map((title) {
                 return Row(mainAxisSize: MainAxisSize.min, children: [
                   GestureDetector(
-                    onTap: () async {
-                      setState(() => _itemTapped = true);
-                      await _pageController.animateToPage(title.key,
-                          curve: Curves.linearToEaseOut,
-                          duration: Duration(milliseconds: 400));
-                      setState(() {
-                        _itemTapped = false;
-                        _clearColorLerp();
-                        _setColorLerp(_pageController.page.round(), 1.0);
-                      });
-                    },
+                    onTap: () => _titleTapped(title.key),
                     child: Text(
                       widget.titles[title.key],
                       key: _titlesProps[title.value]["key"],
