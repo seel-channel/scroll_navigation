@@ -163,7 +163,11 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
                       await _pageController.animateToPage(title.key,
                           curve: Curves.linearToEaseOut,
                           duration: Duration(milliseconds: 400));
-                      setState(() => _itemTapped = false);
+                      setState(() {
+                        _itemTapped = false;
+                        _clearColorLerp();
+                        _setColorLerp(_pageController.page.round(), 1.0);
+                      });
                     },
                     child: Text(
                       widget.titles[title.key],

@@ -145,7 +145,11 @@ class ScrollNavigationState extends State<ScrollNavigation> {
         duration: Duration(milliseconds: 400),
         curve: _animationCurve,
       );
-      setState(() => _itemTapped = false);
+      setState(() {
+        _itemTapped = false;
+        _clearColorLerp();
+        _setColorLerp(_bottomIndex, 1.0);
+      });
     }
   }
 
@@ -183,24 +187,25 @@ class ScrollNavigationState extends State<ScrollNavigation> {
       onWillPop: _onPressBackButton,
       child: Scaffold(
         appBar: widget.navigationOnTop
-            ? preferredSafeArea(child: _buildBottomNavigation(elevation: 0))
+            ? preferredSafeArea(
+                backgroundColor: widget.backgroundColorNav,
+                elevation: widget.elevation,
+                child: _buildBottomNavigation(elevation: 0))
             : null,
-        body: PageView(
-            children: widget.pages,
-            controller: _pageController,
-            onPageChanged: (index) {
-              setState(() {
-                if (_popUpCache.length > _maxItemsCache)
-                  _popUpCache.removeAt(0);
-                if (!_itemTapped) _popUpCache.add(index);
-              });
-            }),
-        backgroundColor: widget.backgroundColorBody != null
-            ? widget.backgroundColorBody
-            : Colors.grey[100],
         bottomNavigationBar: !widget.navigationOnTop
             ? _buildBottomNavigation(elevation: 1 - widget.elevation)
             : null,
+        body: PageView(
+          children: widget.pages,
+          controller: _pageController,
+          onPageChanged: (index) => setState(() {
+            if (_popUpCache.length > _maxItemsCache) _popUpCache.removeAt(0);
+            if (!_itemTapped) _popUpCache.add(index);
+          }),
+        ),
+        backgroundColor: widget.backgroundColorBody != null
+            ? widget.backgroundColorBody
+            : Colors.grey[100],
         floatingActionButton: _pagesActionButtons[_bottomIndex],
         resizeToAvoidBottomPadding: false,
       ),
