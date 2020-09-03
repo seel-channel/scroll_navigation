@@ -63,33 +63,3 @@ class TitleScrollPadding {
   final double betweenTitles;
   double left, right, top, bottom;
 }
-
-///Is used for Color Lerp effect with TextStyle hereded properties.
-TextStyle lerpTitleStyle({Color color, TextStyle style}) {
-  style = style == null ? TextStyle() : style;
-
-  return TextStyle(
-    color: color,
-    inherit: style.inherit,
-    backgroundColor: style.backgroundColor,
-    fontSize: style.fontSize,
-    fontWeight: style.fontWeight,
-    fontStyle: style.fontStyle,
-    letterSpacing: style.letterSpacing,
-    wordSpacing: style.wordSpacing,
-    textBaseline: style.textBaseline,
-    height: style.height,
-    locale: style.locale,
-    foreground: style.foreground,
-    background: style.background,
-    shadows: style.shadows,
-    fontFeatures: style.fontFeatures,
-    decoration: style.decoration,
-    decorationColor: style.decorationColor,
-    decorationStyle: style.decorationStyle,
-    decorationThickness: style.decorationThickness,
-    debugLabel: style.debugLabel,
-    fontFamily: style.fontFamily,
-    fontFamilyFallback: style.fontFamilyFallback,
-  );
-}
