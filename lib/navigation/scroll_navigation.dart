@@ -20,7 +20,7 @@ class ScrollNavigation extends StatefulWidget {
     this.showIdentifier = true,
     this.identifierPhysics = true,
     this.identifierOnBottom = true,
-    this.identifierWithBorder = true,
+    this.identifierWithBorder = false,
     this.activeColor = Colors.blue,
     this.desactiveColor = Colors.grey,
     this.backgroundColorBody,
@@ -87,7 +87,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
   bool _itemTapped = false;
   Orientation _orientation;
   PageController _pageController;
-  GlobalKey navigationKey = GlobalKey();
+  GlobalKey _navigationKey = GlobalKey();
   Cubic _animationCurve = Curves.linearToEaseOut;
   List<int> _popUpCache = List();
   Map<String, double> _identifier = Map();
@@ -183,10 +183,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
       onWillPop: _onPressBackButton,
       child: Scaffold(
         appBar: widget.navigationOnTop
-            ? preferredSafeArea(
-                elevation: widget.elevation,
-                backgroundColor: widget.backgroundColorNav,
-                child: _buildBottomNavigation(elevation: 0))
+            ? preferredSafeArea(child: _buildBottomNavigation(elevation: 0))
             : null,
         body: PageView(
             children: widget.pages,
@@ -210,16 +207,14 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     );
   }
 
-  //WIDGETS
   Widget _buildBottomNavigation({double elevation}) {
     return OrientationBuilder(
       builder: (context, orientation) {
         if (_orientation == null || _orientation != orientation) {
-          double navWidth = MediaQuery.of(context).size.width;
-          double width = navWidth * (1 / widget.navItems.length);
+          Size navSize = MediaQuery.of(context).size;
+          double width = navSize.width * (1 / widget.navItems.length);
           _orientation = orientation;
           _identifier["width"] = width;
-          _identifier["navWidth"] = navWidth;
           _identifier["position"] = width * _bottomIndex;
           _setColorLerp(_bottomIndex, 1.0);
         }
@@ -227,7 +222,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
         return Stack(
           children: <Widget>[
             Container(
-              key: navigationKey,
+              key: _navigationKey,
               padding: EdgeInsets.symmetric(vertical: widget.verticalPadding),
               decoration: BoxDecoration(
                 color: widget.backgroundColorNav,
@@ -243,33 +238,30 @@ class ScrollNavigationState extends State<ScrollNavigation> {
               child: Row(
                 children: [
                   ...widget.navItems.asMap().entries.map((item) {
+                    Color colorLerp() => Color.lerp(widget.desactiveColor,
+                        widget.activeColor, _itemProps[item.key]["lerp"]);
+                    Widget iconMerged() => IconTheme.merge(
+                        data: IconThemeData(color: colorLerp()),
+                        child: item.value.icon);
+                    Widget textMerged() => Text(item.value.title,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: colorLerp())
+                            .merge(widget.navItems[item.key].titleStyle));
+
                     return Expanded(
                       child: InkWell(
                         onTap: () => _onBottomItemTapped(item.key),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            IconTheme.merge(
-                              data: IconThemeData(
-                                color: Color.lerp(
-                                    widget.desactiveColor,
-                                    widget.activeColor,
-                                    _itemProps[item.key]["lerp"]),
-                              ),
-                              child: item.value.icon,
-                            ),
+                            widget.navigationOnTop
+                                ? Expanded(child: iconMerged())
+                                : iconMerged(),
                             if (item.value.title != null &&
                                 item.value.title.isNotEmpty)
-                              Text(
-                                item.value.title,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: Color.lerp(
-                                      widget.desactiveColor,
-                                      widget.activeColor,
-                                      _itemProps[item.key]["lerp"]),
-                                ).merge(widget.navItems[item.key].titleStyle),
-                              ),
+                              widget.navigationOnTop
+                                  ? Expanded(child: textMerged())
+                                  : textMerged(),
                           ],
                         ),
                       ),
