@@ -25,8 +25,10 @@ class ScrollNavigation extends StatefulWidget {
     this.desactiveColor = Colors.grey,
     this.backgroundColorBody,
     this.backgroundColorNav = Colors.white,
-    this.verticalPadding = 20,
+    this.verticalPadding = 18,
     this.elevation = 3.0,
+    this.navItemIconSize = 24.0,
+    this.navItemTitleFontSize = 12.0,
   }) : super(key: key);
 
   /// It is the initial page that will show. The value must match
@@ -45,6 +47,10 @@ class ScrollNavigation extends StatefulWidget {
 
   ///Change navigation position
   final bool navigationOnTop;
+
+  final double navItemIconSize;
+
+  final double navItemTitleFontSize;
 
   /// It is the color that will have icons that are not active.
   final Color desactiveColor;
@@ -82,6 +88,7 @@ class ScrollNavigation extends StatefulWidget {
 }
 
 class ScrollNavigationState extends State<ScrollNavigation> {
+  double _navTopHeight = 0;
   int _bottomIndex = 0;
   int _maxItemsCache = 5;
   bool _identifierPhysics;
@@ -114,8 +121,21 @@ class ScrollNavigationState extends State<ScrollNavigation> {
             : _pagesActionButtons.add(null);
       }
     }
-    for (int i = 0; i < widget.navItems.length; i++)
+    for (int i = 0; i < widget.navItems.length; i++) {
       _itemProps.add({"lerp": 0.0});
+    }
+    if (widget.navigationOnTop)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        int withTitle = 0;
+        for (var item in widget.navItems)
+          if (item.title != null || item.title.isNotEmpty) withTitle += 1;
+        double titleHeight = withTitle == 0 ? 0 : widget.navItemTitleFontSize;
+        double heightItem = (widget.verticalPadding * 2) +
+            widget.navItemIconSize +
+            titleHeight +
+            5;
+        setState(() => _navTopHeight = heightItem);
+      });
     super.initState();
   }
 
@@ -189,12 +209,10 @@ class ScrollNavigationState extends State<ScrollNavigation> {
       child: Scaffold(
         appBar: widget.navigationOnTop
             ? preferredSafeArea(
-                backgroundColor: widget.backgroundColorNav,
+                height: _navTopHeight,
                 elevation: widget.elevation,
-                child: _buildBottomNavigation(elevation: 0))
-            : null,
-        bottomNavigationBar: !widget.navigationOnTop
-            ? _buildBottomNavigation(elevation: 1 - widget.elevation)
+                backgroundColor: widget.backgroundColorNav,
+                child: _buildBottomNavigation(elevation: widget.elevation))
             : null,
         body: PageView(
           children: widget.pages,
@@ -204,6 +222,9 @@ class ScrollNavigationState extends State<ScrollNavigation> {
             if (!_itemTapped) _popUpCache.add(index);
           }),
         ),
+        bottomNavigationBar: !widget.navigationOnTop
+            ? _buildBottomNavigation(elevation: 1 - widget.elevation)
+            : null,
         backgroundColor: widget.backgroundColorBody != null
             ? widget.backgroundColorBody
             : Colors.grey[100],
@@ -244,15 +265,27 @@ class ScrollNavigationState extends State<ScrollNavigation> {
               child: Row(
                 children: [
                   ...widget.navItems.asMap().entries.map((item) {
-                    Color colorLerp() => Color.lerp(widget.desactiveColor,
-                        widget.activeColor, _itemProps[item.key]["lerp"]);
+                    double lerp = _itemProps[item.key]["lerp"];
+                    Color colorLerp() => Color.lerp(
+                        widget.desactiveColor, widget.activeColor, lerp);
                     Widget iconMerged() => IconTheme.merge(
-                        data: IconThemeData(color: colorLerp()),
-                        child: item.value.icon);
+                        key: ValueKey<int>(item.key),
+                        child: item.value.activeIcon == null
+                            ? item.value.icon
+                            : lerp > 0.6
+                                ? item.value.activeIcon
+                                : item.value.icon,
+                        data: IconThemeData(
+                          color: colorLerp(),
+                          size: widget.navItemIconSize,
+                        ));
+
                     Widget textMerged() => Text(item.value.title,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(color: colorLerp())
-                            .merge(widget.navItems[item.key].titleStyle));
+                        style: TextStyle(
+                          color: colorLerp(),
+                          fontSize: widget.navItemTitleFontSize,
+                        ).merge(widget.navItems[item.key].titleStyle));
 
                     return Expanded(
                       child: InkWell(
