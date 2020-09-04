@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 class ScrollNavigationItem {
   /// Creates an item that is used with [ScrollNavigation.navItems].
   /// The argument [icon] should not be null and the argument [title] if null or empty don't show it.
-  ScrollNavigationItem({@required this.icon, this.title, this.titleStyle});
+  ScrollNavigationItem(
+      {@required this.icon, this.title, this.titleStyle, this.activeIcon});
 
   ///The icon to display inside the button.
   ///
@@ -16,6 +17,9 @@ class ScrollNavigationItem {
   ///This property must not be null.
   ///See [Icon], [ImageIcon].
   final Widget icon;
+
+  ///The [icon] will change to the [activeIcon] when the user is on that page.
+  final Widget activeIcon;
 
   ///If the [title] is null or empty won't show it.
   final String title;

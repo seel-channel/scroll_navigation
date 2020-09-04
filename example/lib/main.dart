@@ -36,11 +36,12 @@ class _HomePageState extends State<HomePage> {
         Screen(title: title("Home"))
       ],
       navItems: [
-        navItem(Icons.camera),
-        navItem(Icons.chat),
-        navItem(Icons.favorite),
-        navItem(Icons.notifications),
-        navItem(Icons.home),
+        ScrollNavigationItem(icon: Icon(Icons.camera)),
+        ScrollNavigationItem(icon: Icon(Icons.chat)),
+        ScrollNavigationItem(icon: Icon(Icons.favorite)),
+        ScrollNavigationItem(icon: Icon(Icons.notifications)),
+        ScrollNavigationItem(
+            icon: Icon(Icons.home), activeIcon: Icon(Icons.verified_user))
       ],
       pagesActionButtons: [
         FloatingActionButton(
@@ -63,19 +64,14 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  ScrollNavigationItem navItem(IconData icon) {
-    return ScrollNavigationItem(icon: Icon(icon));
-  }
-
   Widget newHome() {
     return Screen(
+      height: 56.0,
       elevation: 0,
       centerTitle: false,
-      heightMultiplicator: 1,
-      title: title("New Home"),
+      title: title("Title Scroll"),
       leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
       body: TitleScrollNavigation(
-        elevation: 0,
         titles: [
           "Page 1",
           "New page 1",
