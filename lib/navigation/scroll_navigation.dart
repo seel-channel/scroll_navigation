@@ -23,8 +23,8 @@ class ScrollNavigation extends StatefulWidget {
     this.identifierWithBorder = false,
     this.activeColor = Colors.blue,
     this.desactiveColor = Colors.grey,
-    this.backgroundColorBody,
-    this.backgroundColorNav = Colors.white,
+    this.backgroundBody,
+    this.backgroundNav = Colors.white,
     this.verticalPadding = 18,
     this.elevation = 3.0,
     this.navItemIconSize = 24.0,
@@ -45,33 +45,35 @@ class ScrollNavigation extends StatefulWidget {
   /// It is the color that the active icon and indicator will show.
   final Color activeColor;
 
-  ///Change navigation position
+  ///Change navigation position. Default is at the Bottom [false].
   final bool navigationOnTop;
 
+  ///It's the size for [activeIcon] and [icon]. This ignore the [Icon.size]
   final double navItemIconSize;
 
+  ///It's the FontSize for title. This ignore the [FontStyle.fontSize].
   final double navItemTitleFontSize;
 
-  /// It is the color that will have icons that are not active.
+  ///It's the color that will have icons that are not active.
   final Color desactiveColor;
 
-  /// They are the list of elements that the menu will have.
-  /// They must match the total number of pages.
+  ///They are the list of elements that the menu will have.
+  ///They must match the total number of pages.
   final List<ScrollNavigationItem> navItems;
 
-  /// When active, the indicator will move along with the scroll of the pages.
-  /// Of other way, it will only move when you change page.
+  ///When active, the indicator will move along with the scroll of the pages.
+  ///Of other way, it will only move when you change page.
   final bool identifierPhysics;
 
-  /// It will show the identifier.
-  /// If false, the argument [identifierPhysics] will be ignored
+  ///It will show the identifier.
+  ///If false, the argument [identifierPhysics] will be ignored
   final bool showIdentifier;
 
   ///If true show a circular border radius else show a simple rectangle.
   final bool identifierWithBorder;
 
-  ///Mostrará el identificador, en la parte inferior, si no en la parte superior
-  ///de la barra de navegación
+  ///If true, will show the identifier at the navBar bottom.
+  ///Else, at the top of the navBar.
   final bool identifierOnBottom;
 
   ///Boxshadow Y-Offset. If 0 don't show the BoxShadow
@@ -81,7 +83,7 @@ class ScrollNavigation extends StatefulWidget {
   final double verticalPadding;
 
   ///Colooooors :D
-  final Color backgroundColorNav, backgroundColorBody;
+  final Color backgroundNav, backgroundBody;
 
   @override
   ScrollNavigationState createState() => ScrollNavigationState();
@@ -211,7 +213,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
             ? preferredSafeArea(
                 height: _navTopHeight,
                 elevation: widget.elevation,
-                backgroundColor: widget.backgroundColorNav,
+                backgroundColor: widget.backgroundNav,
                 child: _buildBottomNavigation(elevation: widget.elevation))
             : null,
         body: PageView(
@@ -225,8 +227,8 @@ class ScrollNavigationState extends State<ScrollNavigation> {
         bottomNavigationBar: !widget.navigationOnTop
             ? _buildBottomNavigation(elevation: 1 - widget.elevation)
             : null,
-        backgroundColor: widget.backgroundColorBody != null
-            ? widget.backgroundColorBody
+        backgroundColor: widget.backgroundBody != null
+            ? widget.backgroundBody
             : Colors.grey[100],
         floatingActionButton: _pagesActionButtons[_bottomIndex],
         resizeToAvoidBottomPadding: false,
@@ -251,7 +253,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
             Container(
               key: _navigationKey,
               decoration: BoxDecoration(
-                color: widget.backgroundColorNav,
+                color: widget.backgroundNav,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.3),
@@ -290,7 +292,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
                       child: GestureDetector(
                         onTap: () => _onBottomItemTapped(item.key),
                         child: Container(
-                          color: widget.backgroundColorNav,
+                          color: widget.backgroundNav,
                           padding: EdgeInsets.symmetric(
                               vertical: widget.verticalPadding),
                           child: Column(
