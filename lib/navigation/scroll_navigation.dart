@@ -163,7 +163,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
       });
       await _pageController.animateToPage(
         index,
-        duration: Duration(milliseconds: 400),
+        duration: Duration(milliseconds: 500),
         curve: _animationCurve,
       );
       setState(() {
@@ -250,7 +250,6 @@ class ScrollNavigationState extends State<ScrollNavigation> {
           children: <Widget>[
             Container(
               key: _navigationKey,
-              padding: EdgeInsets.symmetric(vertical: widget.verticalPadding),
               decoration: BoxDecoration(
                 color: widget.backgroundColorNav,
                 boxShadow: [
@@ -288,20 +287,25 @@ class ScrollNavigationState extends State<ScrollNavigation> {
                         ).merge(widget.navItems[item.key].titleStyle));
 
                     return Expanded(
-                      child: InkWell(
+                      child: GestureDetector(
                         onTap: () => _onBottomItemTapped(item.key),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            widget.navigationOnTop
-                                ? Expanded(child: iconMerged())
-                                : iconMerged(),
-                            if (item.value.title != null &&
-                                item.value.title.isNotEmpty)
+                        child: Container(
+                          color: widget.backgroundColorNav,
+                          padding: EdgeInsets.symmetric(
+                              vertical: widget.verticalPadding),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
                               widget.navigationOnTop
-                                  ? Expanded(child: textMerged())
-                                  : textMerged(),
-                          ],
+                                  ? Expanded(child: iconMerged())
+                                  : iconMerged(),
+                              if (item.value.title != null &&
+                                  item.value.title.isNotEmpty)
+                                widget.navigationOnTop
+                                    ? Expanded(child: textMerged())
+                                    : textMerged(),
+                            ],
+                          ),
                         ),
                       ),
                     );
