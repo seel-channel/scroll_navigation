@@ -20,7 +20,7 @@ class ScrollNavigation extends StatefulWidget {
     this.showIdentifier = true,
     this.identifierPhysics = true,
     this.identifierOnBottom = true,
-    this.identifierWithBorder = false,
+    this.identifierWithBorder = true,
     this.activeColor = Colors.blue,
     this.desactiveColor = Colors.grey,
     this.backgroundBody,
@@ -113,7 +113,9 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     _popUpCache.add(widget.initialPage);
     _identifierPhysics = widget.identifierPhysics;
     _pageController = PageController(initialPage: widget.initialPage);
-    if (widget.showIdentifier) _pageController.addListener(_scrollListener);
+    _pageController.addListener(_scrollListener);
+
+    //FILL FLOATING ACTION BUTTONS ON _pagesActionButtons
     if (widget.pagesActionButtons == null)
       _pagesActionButtons = List.filled(widget.pages.length, null);
     else {
@@ -126,11 +128,13 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     for (int i = 0; i < widget.navItems.length; i++) {
       _itemProps.add({"lerp": 0.0});
     }
+
+    //SET HEIGHT FOR NAVIGATIONONTOP
     if (widget.navigationOnTop)
       WidgetsBinding.instance.addPostFrameCallback((_) {
         int withTitle = 0;
         for (var item in widget.navItems)
-          if (item.title != null || item.title.isNotEmpty) withTitle += 1;
+          if (item.title != null && item.title.isNotEmpty) withTitle += 1;
         double titleHeight = withTitle == 0 ? 0 : widget.navItemTitleFontSize;
         double heightItem = (widget.verticalPadding * 2) +
             widget.navItemIconSize +
@@ -143,7 +147,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
 
   @override
   void dispose() {
-    if (widget.showIdentifier) _pageController.removeListener(_scrollListener);
+    _pageController.removeListener(_scrollListener);
     super.dispose();
   }
 
@@ -194,11 +198,13 @@ class ScrollNavigationState extends State<ScrollNavigation> {
         if (currentPage + 1 < widget.pages.length)
           _setColorLerp(currentPage + 1, (page - currentPage));
         _setColorLerp(currentPage, 1 - (page - currentPage));
-        _identifier["position"] = _identifier["width"] * page;
+        if (widget.showIdentifier)
+          _identifier["position"] = _identifier["width"] * page;
       } else {
         _clearColorLerp();
         _setColorLerp(page.round(), 1.0);
-        _identifier["position"] = _identifier["width"] * page.round();
+        if (widget.showIdentifier)
+          _identifier["position"] = _identifier["width"] * page.round();
       }
       _bottomIndex = page.round();
     });

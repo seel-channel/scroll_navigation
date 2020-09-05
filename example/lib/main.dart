@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
       initialPage: 4,
       pages: [
         Screen(title: title("Camera")),
-        Screen(title: title("Messages"), backgroundColor: Colors.red[50]),
+        Screen(title: title("Messages"), backgroundColor: Colors.yellow[50]),
         Screen(title: title("Favor"), body: Container(color: Colors.cyan[50])),
         Screen(title: title("Activity"), backgroundColor: Colors.yellow[50]),
         Screen(title: title("Home"))
@@ -41,7 +41,9 @@ class _HomePageState extends State<HomePage> {
         ScrollNavigationItem(icon: Icon(Icons.favorite)),
         ScrollNavigationItem(icon: Icon(Icons.notifications)),
         ScrollNavigationItem(
-            icon: Icon(Icons.home), activeIcon: Icon(Icons.verified_user))
+          icon: Icon(Icons.home),
+          activeIcon: Icon(Icons.verified_user),
+        )
       ],
       pagesActionButtons: [
         FloatingActionButton(
@@ -72,21 +74,11 @@ class _HomePageState extends State<HomePage> {
       title: title("Title Scroll"),
       leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
       body: TitleScrollNavigation(
-        titles: [
-          "Page 1",
-          "New page 1",
-          "Old page 1",
-          "Page 2",
-          "New page 2",
-          "Old page 2",
-        ],
+        titles: ["Page 1", "New page", "Second new page"],
         pages: [
           Container(color: Colors.blue[50]),
           Container(color: Colors.red[50]),
           Container(color: Colors.yellow[50]),
-          Container(color: Colors.green[50]),
-          Container(color: Colors.orange[50]),
-          Container(color: Colors.grey[50]),
         ],
       ),
     );
