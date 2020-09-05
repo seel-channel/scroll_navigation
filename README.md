@@ -89,6 +89,7 @@ final navigationKey = GlobalKey<ScrollNavigationState>();
 @override
 Widget build(BuildContext context) {
   return ScrollNavigation(
+    key: navigationKey,
     navigationOnTop = true, //Default is false
     pages: <Widget>[],
     navItems: <ScrollNavigationItem>[],
@@ -181,7 +182,7 @@ return Screen(
 return Screen(
     height: 56.0,
     centerTitle: false,
-    title: title("Title Scroll"),
+    title: title("New Home"),
     leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
 );
 ```
