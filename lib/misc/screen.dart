@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 ///Returns a Preferred Size widget for an AppBar,
 ///allowing to display content below the statusbar of the device
@@ -65,6 +66,7 @@ class Screen extends StatefulWidget {
     this.centerTitle = true,
     this.backgroundColor = Colors.white,
     this.hideAppBarController,
+    this.hideAppBarOffset = 80.0,
     this.height = 84,
     this.elevation = 3.0,
   }) : super(key: key);
@@ -105,18 +107,21 @@ class Screen extends StatefulWidget {
 
   final ScrollController hideAppBarController;
 
+  final double hideAppBarOffset;
+
   @override
   _ScreenState createState() => _ScreenState();
 }
 
 class _ScreenState extends State<Screen> {
-  double _height = 0.0;
-  double _lerpOpacity = 1;
+  bool _subiendo = false;
+  double _height = 0, _heightRef = 0, _offsetRef = 0;
   ScrollController _controller = ScrollController();
 
   @override
   void initState() {
     _height = widget.height;
+    _heightRef = _height;
     if (widget.hideAppBarController != null) {
       _controller = widget.hideAppBarController;
       _controller.addListener(changeAppBarHeight);
@@ -133,19 +138,40 @@ class _ScreenState extends State<Screen> {
   }
 
   void changeAppBarHeight() {
-    double maxOffset = 80;
-    double offset = _controller.offset;
-    AxisDirection direction = _controller.position.axisDirection;
+    AxisDirection axisDirection = _controller.position.axisDirection;
+    ScrollDirection direction = _controller.position.userScrollDirection;
 
-    setState(() {
-      if (direction == AxisDirection.up || direction == AxisDirection.down) {
-        if (offset < maxOffset) {
-          _height = lerpDouble(widget.height, 0, offset / maxOffset);
-          _lerpOpacity = 1 - (offset / maxOffset).abs();
-          print(_lerpOpacity);
-        }
+    if (axisDirection == AxisDirection.up ||
+        axisDirection == AxisDirection.down) {
+      //Subiendo
+      if (direction == ScrollDirection.forward) {
+        if (!_subiendo) setRefs();
+        setHeight(widget.height);
       }
+      //Bajando
+      if (direction == ScrollDirection.reverse) {
+        if (_subiendo) setRefs();
+        setHeight(0);
+      }
+    }
+  }
+
+  void setRefs() {
+    setState(() {
+      _subiendo = !_subiendo;
+      _heightRef = _height;
+      _offsetRef = _controller.offset;
     });
+  }
+
+  void setHeight(double toValue) {
+    double lerp = (_offsetRef - _controller.offset) / widget.hideAppBarOffset;
+    lerp = lerp.abs();
+    if (lerp <= 1.0) {
+      setState(() {
+        _height = lerpDouble(_heightRef, toValue, lerp);
+      });
+    }
   }
 
   @override
@@ -169,7 +195,7 @@ class _ScreenState extends State<Screen> {
             0.2,
             1.0,
             curve: Curves.ease,
-          ).transform(_lerpOpacity),
+          ).transform(_height / widget.height),
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: paddingConst),
             child: widget.centerTitle
