@@ -21,6 +21,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  ScrollController controller = ScrollController();
   final navigationKey = GlobalKey<ScrollNavigationState>();
 
   @override
@@ -71,12 +72,25 @@ class _HomePageState extends State<HomePage> {
       height: 56.0,
       elevation: 0,
       centerTitle: false,
+      hideAppBarController: controller,
       title: title("Title Scroll"),
       leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
       body: TitleScrollNavigation(
         titles: ["Page 1", "New page", "Second new page"],
         pages: [
-          Container(color: Colors.blue[50]),
+          ListView.builder(
+            itemCount: 15,
+            controller: controller,
+            itemBuilder: (context, key) {
+              return Padding(
+                padding: EdgeInsets.all(10),
+                child: Container(
+                  height: 50,
+                  color: Colors.blue[50],
+                ),
+              );
+            },
+          ),
           Container(color: Colors.red[50]),
           Container(color: Colors.yellow[50]),
         ],

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 ///Returns a Preferred Size widget for an AppBar,
@@ -48,8 +50,8 @@ class ScreenReturnButton extends StatelessWidget {
   }
 }
 
-class Screen extends StatelessWidget {
-// It is a Widget very similar to a Scaffold, in a way, it uses the
+class Screen extends StatefulWidget {
+  // It is a Widget very similar to a Scaffold, in a way, it uses the
   ///Scaffold core, but fixes some problems the Scaffold has with the
   ///ScrollNavigation.
   Screen({
@@ -62,6 +64,7 @@ class Screen extends StatelessWidget {
     this.showAppBar = true,
     this.centerTitle = true,
     this.backgroundColor = Colors.white,
+    this.hideAppBarController,
     this.height = 84,
     this.elevation = 3.0,
   }) : super(key: key);
@@ -100,12 +103,57 @@ class Screen extends StatelessWidget {
   ///Boxshadow Y-Offset. If 0 don't show the BoxShadow
   final double elevation;
 
+  final ScrollController hideAppBarController;
+
+  @override
+  _ScreenState createState() => _ScreenState();
+}
+
+class _ScreenState extends State<Screen> {
+  double _height = 0.0;
+  double _lerpOpacity = 1;
+  ScrollController _controller = ScrollController();
+
+  @override
+  void initState() {
+    _height = widget.height;
+    if (widget.hideAppBarController != null) {
+      _controller = widget.hideAppBarController;
+      _controller.addListener(changeAppBarHeight);
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    if (widget.hideAppBarController != null) {
+      _controller.removeListener(changeAppBarHeight);
+    }
+    super.dispose();
+  }
+
+  void changeAppBarHeight() {
+    double maxOffset = 80;
+    double offset = _controller.offset;
+    AxisDirection direction = _controller.position.axisDirection;
+
+    setState(() {
+      if (direction == AxisDirection.up || direction == AxisDirection.down) {
+        if (offset < maxOffset) {
+          _height = lerpDouble(widget.height, 0, offset / maxOffset);
+          _lerpOpacity = 1 - (offset / maxOffset).abs();
+          print(_lerpOpacity);
+        }
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: showAppBar ? appBar(context) : null,
-      body: body,
-      floatingActionButton: floatingButton,
+      appBar: widget.showAppBar ? appBar(context) : null,
+      body: widget.body,
+      floatingActionButton: widget.floatingButton,
       resizeToAvoidBottomPadding: false,
     );
   }
@@ -113,43 +161,49 @@ class Screen extends StatelessWidget {
   Widget appBar(BuildContext context) {
     double paddingConst = MediaQuery.of(context).size.width * 0.05;
     return preferredSafeArea(
-      elevation: elevation,
-      backgroundColor: backgroundColor,
-      height: height,
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: paddingConst),
-        child: centerTitle
-            ? Stack(alignment: AlignmentDirectional.centerStart, children: [
-                Center(child: title),
-                Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: leftWidget,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [Container(child: rightWidget)],
-                ),
-              ])
-            : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Align(
-                  alignment: AlignmentDirectional.centerStart,
-                  child: leftWidget == null
-                      ? null
-                      : Padding(
-                          padding: EdgeInsets.only(right: paddingConst),
-                          child: leftWidget),
-                ),
-                Expanded(flex: 70, child: title),
-                Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: rightWidget == null
-                      ? null
-                      : Padding(
-                          padding: EdgeInsets.only(left: paddingConst),
-                          child: rightWidget),
-                ),
-              ]),
-      ),
-    );
+        elevation: widget.elevation,
+        backgroundColor: widget.backgroundColor,
+        height: _height,
+        child: Opacity(
+          opacity: Interval(
+            0.2,
+            1.0,
+            curve: Curves.ease,
+          ).transform(_lerpOpacity),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: paddingConst),
+            child: widget.centerTitle
+                ? Stack(alignment: AlignmentDirectional.centerStart, children: [
+                    Center(child: widget.title),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: widget.leftWidget,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [Container(child: widget.rightWidget)],
+                    ),
+                  ])
+                : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: widget.leftWidget == null
+                          ? null
+                          : Padding(
+                              padding: EdgeInsets.only(right: paddingConst),
+                              child: widget.leftWidget),
+                    ),
+                    Expanded(flex: 70, child: widget.title),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: widget.rightWidget == null
+                          ? null
+                          : Padding(
+                              padding: EdgeInsets.only(left: paddingConst),
+                              child: widget.rightWidget),
+                    ),
+                  ]),
+          ),
+        ));
   }
 }
