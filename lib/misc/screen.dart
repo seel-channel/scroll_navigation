@@ -65,8 +65,8 @@ class Screen extends StatefulWidget {
     this.showAppBar = true,
     this.centerTitle = true,
     this.backgroundColor = Colors.white,
-    this.hideAppBarController,
-    this.hideAppBarOffset = 80.0,
+    this.controllerToHideAppBar,
+    this.offsetToHideAppBar = 80.0,
     this.height = 84,
     this.elevation = 3.0,
   }) : super(key: key);
@@ -105,9 +105,15 @@ class Screen extends StatefulWidget {
   ///Boxshadow Y-Offset. If 0 don't show the BoxShadow
   final double elevation;
 
-  final ScrollController hideAppBarController;
+  ///This parameter is used to hide the appbar when scrolling vertically
+  ///a listview or some other scrolling widget that accepts a ScrollController.
+  final ScrollController controllerToHideAppBar;
 
-  final double hideAppBarOffset;
+  ///It's the number of pixels that scrolling will need to hide or
+  ///show the appbar. The smaller the number of pixels, the faster
+  ///the application bar will hide when scrolling; otherwise,
+  ///it will take longer to hide.
+  final double offsetToHideAppBar;
 
   @override
   _ScreenState createState() => _ScreenState();
@@ -122,8 +128,8 @@ class _ScreenState extends State<Screen> {
   void initState() {
     _height = widget.height;
     _heightRef = _height;
-    if (widget.hideAppBarController != null) {
-      _controller = widget.hideAppBarController;
+    if (widget.controllerToHideAppBar != null) {
+      _controller = widget.controllerToHideAppBar;
       _controller.addListener(changeAppBarHeight);
     }
     super.initState();
@@ -131,7 +137,7 @@ class _ScreenState extends State<Screen> {
 
   @override
   void dispose() {
-    if (widget.hideAppBarController != null) {
+    if (widget.controllerToHideAppBar != null) {
       _controller.removeListener(changeAppBarHeight);
     }
     super.dispose();
@@ -165,7 +171,7 @@ class _ScreenState extends State<Screen> {
   }
 
   void setHeight(double toValue) {
-    double lerp = (_offsetRef - _controller.offset) / widget.hideAppBarOffset;
+    double lerp = (_offsetRef - _controller.offset) / widget.offsetToHideAppBar;
     lerp = lerp.abs();
     if (lerp <= 1.0) {
       setState(() {

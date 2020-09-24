@@ -72,8 +72,8 @@ class _HomePageState extends State<HomePage> {
       height: 56.0,
       elevation: 0,
       centerTitle: false,
-      hideAppBarController: controller,
       title: title("Title Scroll"),
+      controllerToHideAppBar: controller,
       leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
       body: TitleScrollNavigation(
         titles: ["Page 1", "New page", "Second new page"],
@@ -83,7 +83,7 @@ class _HomePageState extends State<HomePage> {
             controller: controller,
             itemBuilder: (context, key) {
               return Padding(
-                padding: EdgeInsets.all(10),
+                padding: EdgeInsets.symmetric(vertical: 5),
                 child: Container(
                   height: 50,
                   color: Colors.blue[50],
