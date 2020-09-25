@@ -125,7 +125,6 @@ void goToPage(int index) {
 
 ```dart
 return ScrollNavigation(
-    //DEFAULT VALUES
     showIdentifier = true,
     identifierPhysics = true,
     identifierOnBottom = true,
@@ -170,21 +169,38 @@ return Screen(
 
 <br><br>
 
-#### More details
+#### Hide AppBar on scroll.
 
-![](assets/readme/screen/screenMoreDetails.jpg)
+![](assets/readme/screen/hideAppBarOnScroll.gif)
 
 <br>
 
 #### Code
 
 ```dart
+ScrollController controller = ScrollController();
+
 return Screen(
     height: 56.0,
+    elevation: 0.0,
     centerTitle: false,
-    title: title("New Home"),
+    title: title("Title Scroll"),
     leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
-);
+    controllerToHideAppBar: controller,
+    body: ListView.builder(
+      itemCount: 15,
+      controller: controller,
+      itemBuilder: (context, key) {
+        return Padding(
+          padding: EdgeInsets.symmetric(vertical: 5),
+          child: Container(
+            height: 50,
+            color: Colors.blue[50],
+          ),
+        );
+      },
+    ),
+  );
 ```
 
 <br><br>

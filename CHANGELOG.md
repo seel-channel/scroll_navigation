@@ -1,14 +1,18 @@
+## [1.1.1]
+
+- Added the option to hide the AppBar on the Screen Widget when assigning a ScrollController.
+
 ## [1.1.0]
 
-- ScrollNavigation was optimized making it 35% faster.
 - TitleScrollNavigation was added.
+- ScrollNavigation was optimized making it 35% faster.
 - Some parameters have been improved causing some options from previous versions to be obsolete.
 
 ## [1.0.3]
 
-- Scroll Navigation can be on top or on bottom.
-- ScreenReturnButton widget was created.
 - Screen Widget was updated.
+- ScreenReturnButton widget was created.
+- Scroll Navigation can be on top or on bottom.
 
 ## [1.0.2]
 
