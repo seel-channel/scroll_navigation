@@ -27,8 +27,6 @@ class ScrollNavigation extends StatefulWidget {
     this.backgroundNav = Colors.white,
     this.verticalPadding = 18,
     this.elevation = 3.0,
-    this.navItemIconSize = 24.0,
-    this.navItemTitleFontSize = 12.0,
   })  : this.identifierBorderRadius =
             identifierBorderRadius ?? identifierOnBottom
                 ? BorderRadius.only(
@@ -55,12 +53,6 @@ class ScrollNavigation extends StatefulWidget {
 
   ///Change navigation position. Default is at the Bottom [false].
   final bool navigationOnTop;
-
-  ///It's the size for [activeIcon] and [icon]. This ignore the [Icon.size]
-  final double navItemIconSize;
-
-  ///It's the FontSize for title. This ignore the [FontStyle.fontSize].
-  final double navItemTitleFontSize;
 
   ///It's the color that will have icons that are not active.
   final Color desactiveColor;
@@ -140,14 +132,25 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     //SET HEIGHT FOR NAVIGATIONONTOP
     if (widget.navigationOnTop)
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        int withTitle = 0;
-        for (var item in widget.navItems)
-          if (item.title != null && item.title.isNotEmpty) withTitle += 1;
-        double titleHeight = withTitle == 0 ? 0 : widget.navItemTitleFontSize;
-        double heightItem = (widget.verticalPadding * 2) +
-            widget.navItemIconSize +
+        double maxFontSize = 0;
+        double maxIconSize = 0;
+        int itemsWithTitle = 0;
+        for (ScrollNavigationItem item in widget.navItems) {
+          final Icon icon = item.icon;
+          final TextStyle style = item.titleStyle;
+          final double fontSize = style != null ? style.fontSize : 0.0;
+          final double iconSize =
+              icon != null ? icon.size ?? IconTheme.of(context).size : 0.0;
+          if (item.title != null && item.title.isNotEmpty) itemsWithTitle += 1;
+          if (fontSize > maxFontSize) maxFontSize = fontSize;
+          if (iconSize > maxIconSize) maxIconSize = iconSize;
+        }
+        final double spaceBeetween = itemsWithTitle == 0 ? 0 : 5;
+        final double titleHeight = itemsWithTitle == 0 ? 0 : maxFontSize;
+        final double heightItem = (widget.verticalPadding * 2) +
+            maxIconSize +
             titleHeight +
-            5;
+            spaceBeetween;
         setState(() => _navTopHeight = heightItem);
       });
     super.initState();
@@ -331,10 +334,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
                 : lerp > 0.6
                     ? value.activeIcon
                     : value.icon,
-            data: IconThemeData(
-              color: colorLerp(),
-              size: widget.navItemIconSize,
-            ),
+            data: IconThemeData(color: colorLerp()),
           );
         }
 
@@ -342,10 +342,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
           return Text(
             value.title,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: colorLerp(),
-              fontSize: widget.navItemTitleFontSize,
-            ).merge(value.titleStyle),
+            style: TextStyle(color: colorLerp()).merge(value.titleStyle),
           );
         }
 

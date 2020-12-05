@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 class ScrollNavigationItem {
   /// Creates an item that is used with [ScrollNavigation.navItems].
   /// The argument [icon] should not be null and the argument [title] if null or empty don't show it.
-  ScrollNavigationItem(
-      {@required this.icon, this.title, this.titleStyle, this.activeIcon});
+  ScrollNavigationItem({
+    this.icon,
+    this.title,
+    this.titleStyle,
+    this.activeIcon,
+  });
 
   ///The icon to display inside the button.
   ///
