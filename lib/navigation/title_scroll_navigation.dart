@@ -72,6 +72,7 @@ class TitleScrollNavigation extends StatefulWidget {
 
 class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   Map<String, Map<String, dynamic>> _titlesProps = Map();
+  ScrollController _titlesController = ScrollController();
   Map<String, double> _identifier = Map();
   List<String> _titles = List();
   PageController _pageController;
@@ -80,6 +81,8 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   int _currentPage = 0;
   bool _itemTapped = false;
   double _initialPosition = 0.0;
+  double _halfWidth = 0.0;
+  double _maxScroll = 0.0;
 
   ///Go to a page :)
   void goToPage(int index) => _titleTapped(index);
@@ -113,6 +116,9 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
       }
       _identifier["width"] = _getProp(widget.initialPage, "width");
       _identifier["position"] = _padding.left;
+
+      _halfWidth = MediaQuery.of(context).size.width / 2;
+      _maxScroll = _titlesController.position.maxScrollExtent;
     });
   }
 
@@ -129,6 +135,17 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
         _setColorLerp(current + 1, decimal);
       }
       _setColorLerp(current, 1 - decimal);
+
+      double jumpTo =
+          _identifier["position"] - _halfWidth + (_identifier["width"] / 2);
+
+      if (jumpTo > _maxScroll) {
+        jumpTo = _maxScroll;
+      } else if (jumpTo < 0) {
+        jumpTo = 0;
+      }
+
+      _titlesController.jumpTo(jumpTo);
       if (current != _currentPage) _currentPage = current;
     });
   }
@@ -199,6 +216,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
 
   Widget _buildScrollTitles() {
     return SingleChildScrollView(
+      controller: _titlesController,
       scrollDirection: Axis.horizontal,
       child: Stack(
         children: [
