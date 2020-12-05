@@ -27,7 +27,9 @@ class ScrollNavigation extends StatefulWidget {
     this.backgroundNav = Colors.white,
     this.verticalPadding = 18,
     this.elevation = 3.0,
-  })  : this.identifierBorderRadius =
+  })  : assert(navItems != null && pages != null),
+        assert(navItems.length == pages.length),
+        this.identifierBorderRadius =
             identifierBorderRadius ?? identifierOnBottom
                 ? BorderRadius.only(
                     topRight: Radius.circular(10.0),

@@ -23,7 +23,9 @@ class TitleScrollNavigation extends StatefulWidget {
     this.desactiveColor = Colors.grey,
     Color backgroundColorBody,
     this.backgroundColorNav = Colors.white,
-  })  : this.padding = padding ?? TitleScrollPadding(),
+  })  : assert(titles != null && pages != null),
+        assert(titles.length == pages.length),
+        this.padding = padding ?? TitleScrollPadding(),
         this.backgroundColorBody = backgroundColorBody ?? Colors.grey[100],
         this.identifierBorderRadius = identifierBorderRadius ??
             BorderRadius.only(
