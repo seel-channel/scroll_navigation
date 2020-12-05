@@ -12,15 +12,15 @@ class ScrollNavigation extends StatefulWidget {
   /// Pages and NavItems must have the same number of elements.
   ScrollNavigation({
     Key key,
-    @required this.pages,
-    @required this.navItems,
+    this.pages,
+    this.navItems,
     this.pagesActionButtons,
     this.initialPage = 0,
     this.navigationOnTop = false,
     this.showIdentifier = true,
     this.identifierPhysics = true,
     this.identifierOnBottom = true,
-    this.identifierWithBorder = true,
+    BorderRadiusGeometry identifierBorderRadius,
     this.activeColor = Colors.blue,
     this.desactiveColor = Colors.grey,
     this.backgroundBody,
@@ -29,7 +29,15 @@ class ScrollNavigation extends StatefulWidget {
     this.elevation = 3.0,
     this.navItemIconSize = 24.0,
     this.navItemTitleFontSize = 12.0,
-  }) : super(key: key);
+  })  : this.identifierBorderRadius =
+            identifierBorderRadius ?? identifierOnBottom
+                ? BorderRadius.only(
+                    topRight: Radius.circular(10.0),
+                    topLeft: Radius.circular(10.0))
+                : BorderRadius.only(
+                    bottomRight: Radius.circular(10.0),
+                    bottomLeft: Radius.circular(10.0)),
+        super(key: key);
 
   /// It is the initial page that will show. The value must match
   /// with the existing indexes and the total number of Nav Items
@@ -69,8 +77,8 @@ class ScrollNavigation extends StatefulWidget {
   ///If false, the argument [identifierPhysics] will be ignored
   final bool showIdentifier;
 
-  ///If true show a circular border radius else show a simple rectangle.
-  final bool identifierWithBorder;
+  ///Show a circular border radius else show a simple rectangle.
+  final BorderRadiusGeometry identifierBorderRadius;
 
   ///If true, will show the identifier at the navBar bottom.
   ///Else, at the top of the navBar.
@@ -110,10 +118,10 @@ class ScrollNavigationState extends State<ScrollNavigation> {
   @override
   void initState() {
     _bottomIndex = widget.initialPage;
-    _popUpCache.add(widget.initialPage);
-    _identifierPhysics = widget.identifierPhysics;
     _pageController = PageController(initialPage: widget.initialPage);
+    _identifierPhysics = widget.identifierPhysics;
     _pageController.addListener(_scrollListener);
+    _popUpCache.add(widget.initialPage);
 
     //FILL FLOATING ACTION BUTTONS ON _pagesActionButtons
     if (widget.pagesActionButtons == null)
@@ -151,6 +159,30 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     super.dispose();
   }
 
+  void _scrollListener() {
+    double page = _pageController.page;
+    int currentPage = page.floor();
+    setState(() {
+      if (_identifierPhysics) {
+        if (_itemTapped) _clearColorLerp();
+        if (currentPage + 1 < widget.pages.length)
+          _setColorLerp(currentPage + 1, (page - currentPage));
+        _setColorLerp(currentPage, 1 - (page - currentPage));
+        if (widget.showIdentifier)
+          _identifier["position"] = _identifier["width"] * page;
+      } else {
+        _clearColorLerp();
+        _setColorLerp(page.round(), 1.0);
+        if (widget.showIdentifier)
+          _identifier["position"] = _identifier["width"] * page.round();
+      }
+      _bottomIndex = page.round();
+    });
+  }
+
+  //---------//
+  //CALLBACKS//
+  //---------//
   Future<bool> _onPressBackButton() async {
     if (_popUpCache.length != 1) {
       _popUpCache.removeLast();
@@ -180,6 +212,9 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     }
   }
 
+  //----------//
+  //COLOR LERP//
+  //----------//
   void _clearColorLerp() {
     for (int i = 0; i < widget.navItems.length; i++)
       _itemProps[i]["lerp"] = 0.0;
@@ -189,166 +224,153 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     _itemProps[index]["lerp"] = result;
   }
 
-  void _scrollListener() {
-    double page = _pageController.page;
-    int currentPage = page.floor();
-    setState(() {
-      if (_identifierPhysics) {
-        if (_itemTapped) _clearColorLerp();
-        if (currentPage + 1 < widget.pages.length)
-          _setColorLerp(currentPage + 1, (page - currentPage));
-        _setColorLerp(currentPage, 1 - (page - currentPage));
-        if (widget.showIdentifier)
-          _identifier["position"] = _identifier["width"] * page;
-      } else {
-        _clearColorLerp();
-        _setColorLerp(page.round(), 1.0);
-        if (widget.showIdentifier)
-          _identifier["position"] = _identifier["width"] * page.round();
-      }
-      _bottomIndex = page.round();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onPressBackButton,
-      child: Scaffold(
-        appBar: widget.navigationOnTop
-            ? preferredSafeArea(
-                height: _navTopHeight,
-                elevation: widget.elevation,
-                backgroundColor: widget.backgroundNav,
-                child: _buildBottomNavigation(elevation: widget.elevation))
-            : null,
-        body: PageView(
-          children: widget.pages,
-          controller: _pageController,
-          onPageChanged: (index) => setState(() {
-            if (_popUpCache.length > _maxItemsCache) _popUpCache.removeAt(0);
-            if (!_itemTapped) _popUpCache.add(index);
-          }),
-        ),
-        bottomNavigationBar: !widget.navigationOnTop
-            ? _buildBottomNavigation(elevation: 1 - widget.elevation)
-            : null,
-        backgroundColor: widget.backgroundBody != null
-            ? widget.backgroundBody
-            : Colors.grey[100],
-        floatingActionButton: _pagesActionButtons[_bottomIndex],
-        resizeToAvoidBottomPadding: false,
+      child: OrientationBuilder(
+        builder: (_, Orientation orientation) {
+          if (_orientation == null || _orientation != orientation) {
+            double width = MediaQuery.of(context).size.width;
+            width = width * (1 / widget.navItems.length);
+            _orientation = orientation;
+            _identifier["width"] = width;
+            _identifier["position"] = width * _bottomIndex;
+            _setColorLerp(_bottomIndex, 1.0);
+          }
+
+          return Scaffold(
+            appBar: widget.navigationOnTop
+                ? preferredSafeArea(
+                    height: _navTopHeight,
+                    elevation: widget.elevation,
+                    backgroundColor: widget.backgroundNav,
+                    child: _buildBottomNavigation(elevation: widget.elevation))
+                : null,
+            body: PageView(
+              children: widget.pages,
+              controller: _pageController,
+              onPageChanged: (index) => setState(() {
+                if (_popUpCache.length > _maxItemsCache)
+                  _popUpCache.removeAt(0);
+                if (!_itemTapped) _popUpCache.add(index);
+              }),
+            ),
+            bottomNavigationBar: !widget.navigationOnTop
+                ? _buildBottomNavigation(elevation: 1 - widget.elevation)
+                : null,
+            backgroundColor: widget.backgroundBody != null
+                ? widget.backgroundBody
+                : Colors.grey[100],
+            floatingActionButton: _pagesActionButtons[_bottomIndex],
+            resizeToAvoidBottomPadding: false,
+          );
+        },
       ),
     );
   }
 
   Widget _buildBottomNavigation({double elevation}) {
-    return OrientationBuilder(
-      builder: (context, orientation) {
-        if (_orientation == null || _orientation != orientation) {
-          Size navSize = MediaQuery.of(context).size;
-          double width = navSize.width * (1 / widget.navItems.length);
-          _orientation = orientation;
-          _identifier["width"] = width;
-          _identifier["position"] = width * _bottomIndex;
-          _setColorLerp(_bottomIndex, 1.0);
+    return Stack(
+      children: <Widget>[
+        Container(
+          key: _navigationKey,
+          decoration: BoxDecoration(
+            color: widget.backgroundNav,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: -3,
+                blurRadius: 2,
+                offset: Offset(0, elevation),
+              ),
+            ],
+          ),
+          child: Row(children: _buildNavIcon()),
+        ),
+        if (widget.showIdentifier) _buildIdentifier()
+      ],
+    );
+  }
+
+  Widget _buildIdentifier() {
+    return AnimatedPositioned(
+      height: 3.0,
+      width: _identifier["width"],
+      left: _identifier["position"],
+      bottom: widget.identifierOnBottom ? 0 : null,
+      duration: _identifierPhysics
+          ? Duration(milliseconds: 0)
+          : Duration(milliseconds: 200),
+      curve: _animationCurve,
+      child: Container(
+        decoration: BoxDecoration(
+          color: widget.activeColor,
+          borderRadius: widget.identifierBorderRadius,
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildNavIcon() {
+    return [
+      ...widget.navItems.asMap().entries.map((item) {
+        final int key = item.key;
+        final double lerp = _itemProps[key]["lerp"];
+        final ScrollNavigationItem value = item.value;
+
+        Color colorLerp() {
+          return Color.lerp(widget.desactiveColor, widget.activeColor, lerp);
         }
 
-        return Stack(
-          children: <Widget>[
-            Container(
-              key: _navigationKey,
-              decoration: BoxDecoration(
-                color: widget.backgroundNav,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.3),
-                    spreadRadius: -3,
-                    blurRadius: 2,
-                    offset: Offset(0, elevation),
-                  ),
-                ],
-              ),
-              child: Row(
+        Widget iconMerged() {
+          return IconTheme.merge(
+            key: ValueKey<int>(key),
+            child: value.activeIcon == null
+                ? value.icon
+                : lerp > 0.6
+                    ? value.activeIcon
+                    : value.icon,
+            data: IconThemeData(
+              color: colorLerp(),
+              size: widget.navItemIconSize,
+            ),
+          );
+        }
+
+        Widget textMerged() {
+          return Text(
+            value.title,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: colorLerp(),
+              fontSize: widget.navItemTitleFontSize,
+            ).merge(value.titleStyle),
+          );
+        }
+
+        return Expanded(
+          child: GestureDetector(
+            onTap: () => _onBottomItemTapped(key),
+            child: Container(
+              color: widget.backgroundNav,
+              padding: EdgeInsets.symmetric(vertical: widget.verticalPadding),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  ...widget.navItems.asMap().entries.map((item) {
-                    double lerp = _itemProps[item.key]["lerp"];
-                    Color colorLerp() => Color.lerp(
-                        widget.desactiveColor, widget.activeColor, lerp);
-                    Widget iconMerged() => IconTheme.merge(
-                        key: ValueKey<int>(item.key),
-                        child: item.value.activeIcon == null
-                            ? item.value.icon
-                            : lerp > 0.6
-                                ? item.value.activeIcon
-                                : item.value.icon,
-                        data: IconThemeData(
-                          color: colorLerp(),
-                          size: widget.navItemIconSize,
-                        ));
-
-                    Widget textMerged() => Text(item.value.title,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: colorLerp(),
-                          fontSize: widget.navItemTitleFontSize,
-                        ).merge(widget.navItems[item.key].titleStyle));
-
-                    return Expanded(
-                      child: GestureDetector(
-                        onTap: () => _onBottomItemTapped(item.key),
-                        child: Container(
-                          color: widget.backgroundNav,
-                          padding: EdgeInsets.symmetric(
-                              vertical: widget.verticalPadding),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              widget.navigationOnTop
-                                  ? Expanded(child: iconMerged())
-                                  : iconMerged(),
-                              if (item.value.title != null &&
-                                  item.value.title.isNotEmpty)
-                                widget.navigationOnTop
-                                    ? Expanded(child: textMerged())
-                                    : textMerged(),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  })
+                  widget.navigationOnTop
+                      ? Expanded(child: iconMerged())
+                      : iconMerged(),
+                  if (value.title != null && value.title.isNotEmpty)
+                    widget.navigationOnTop
+                        ? Expanded(child: textMerged())
+                        : textMerged(),
                 ],
               ),
             ),
-            if (widget.showIdentifier)
-              AnimatedPositioned(
-                height: 3.0,
-                width: _identifier["width"],
-                left: _identifier["position"],
-                bottom: widget.identifierOnBottom ? 0 : null,
-                duration: _identifierPhysics
-                    ? Duration(milliseconds: 0)
-                    : Duration(milliseconds: 200),
-                curve: _animationCurve,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: widget.activeColor,
-                    borderRadius: widget.identifierWithBorder
-                        ? widget.identifierOnBottom
-                            ? BorderRadius.only(
-                                topRight: Radius.circular(10.0),
-                                topLeft: Radius.circular(10.0))
-                            : BorderRadius.only(
-                                bottomRight: Radius.circular(10.0),
-                                bottomLeft: Radius.circular(10.0))
-                        : null,
-                  ),
-                ),
-              ),
-          ],
+          ),
         );
-      },
-    );
+      })
+    ];
   }
 }
