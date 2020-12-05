@@ -13,7 +13,11 @@ class App extends StatelessWidget {
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
     ));
-    return MaterialApp(title: 'Scroll Navigation Demo', home: HomePage());
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Scroll Navigation Demo',
+      home: HomePage(),
+    );
   }
 }
 
