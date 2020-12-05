@@ -11,19 +11,25 @@ class TitleScrollNavigation extends StatefulWidget {
   ///and will have a color interpolation between titles.
   TitleScrollNavigation({
     Key key,
-    @required this.titles,
-    @required this.pages,
+    this.titles,
+    this.pages,
     this.initialPage = 0,
     this.titleStyle,
-    this.padding,
+    TitleScrollPadding padding,
     this.elevation = 3.0,
-    this.identifierWithBorder = false,
+    BorderRadiusGeometry identifierBorderRadius,
     this.identifierColor = Colors.blue,
     this.activeColor = Colors.blue,
     this.desactiveColor = Colors.grey,
-    this.backgroundColorBody,
+    Color backgroundColorBody,
     this.backgroundColorNav = Colors.white,
-  }) : super(key: key);
+  })  : this.padding = padding ?? TitleScrollPadding(),
+        this.backgroundColorBody = backgroundColorBody ?? Colors.grey[100],
+        this.identifierBorderRadius = identifierBorderRadius ??
+            BorderRadius.only(
+                topRight: Radius.circular(10.0),
+                topLeft: Radius.circular(10.0)),
+        super(key: key);
 
   final List<String> titles;
 
@@ -38,7 +44,7 @@ class TitleScrollNavigation extends StatefulWidget {
   final TitleScrollPadding padding;
 
   ///If true, the identifier will have rounded corner; else, will show a rectangle.
-  final bool identifierWithBorder;
+  final BorderRadiusGeometry identifierBorderRadius;
 
   ///It's the style than the titles will have.
   final TextStyle titleStyle;
@@ -63,12 +69,15 @@ class TitleScrollNavigation extends StatefulWidget {
 }
 
 class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
-  bool _itemTapped = false;
-  List<String> _titles = List();
-  TitleScrollPadding _padding;
-  PageController _pageController;
-  Map<String, double> _identifier = Map();
   Map<String, Map<String, dynamic>> _titlesProps = Map();
+  Map<String, double> _identifier = Map();
+  List<String> _titles = List();
+  PageController _pageController;
+  TitleScrollPadding _padding;
+
+  int _currentPage = 0;
+  bool _itemTapped = false;
+  double _initialPosition = 0.0;
 
   ///Go to a page :)
   void goToPage(int index) => _titleTapped(index);
@@ -77,34 +86,80 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   void initState() {
     _createTitleProps();
     _setColorLerp(widget.initialPage, 1.0);
+    _padding = widget.padding;
+    _currentPage = widget.initialPage;
     _pageController = PageController(initialPage: widget.initialPage);
     _pageController.addListener(_scrollListener);
-    widget.padding == null
-        ? _padding = TitleScrollPadding()
-        : _padding = widget.padding;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _setTitleWidth());
+    WidgetsBinding.instance.addPostFrameCallback((_) => _setTitlesWidth());
     super.initState();
-  }
-
-  void _titleTapped(int index) async {
-    setState(() => _itemTapped = true);
-    await _pageController.animateToPage(index,
-        curve: Curves.linearToEaseOut, duration: Duration(milliseconds: 400));
-    setState(() {
-      _itemTapped = false;
-      _clearColorLerp();
-      _setColorLerp(_pageController.page.round(), 1.0);
-    });
   }
 
   void _createTitleProps() {
     for (int i = 0; i < widget.titles.length; i++) {
       String title = "${widget.titles[i]}$i";
-      _titlesProps[title] = {"lerp": 0.0, "key": GlobalKey()};
+      _titlesProps[title] = {"lerp": 0.0, "key": GlobalKey(), "width": 0.0};
       _titles.add(title);
     }
   }
 
+  void _setTitlesWidth() {
+    setState(() {
+      for (String title in _titles) {
+        final GlobalKey key = _titlesProps[title]["key"];
+        final double width = key.currentContext.size.width;
+        _titlesProps[title]["width"] = width;
+      }
+      _identifier["width"] = _getProp(widget.initialPage, "width");
+      _identifier["position"] = _padding.left;
+    });
+  }
+
+  void _scrollListener() {
+    final double page = _pageController.page;
+    final int current = page.floor();
+    final double decimal = page - current;
+
+    setState(() {
+      if (_itemTapped) _clearColorLerp();
+      if (current + 1 < widget.pages.length) {
+        _identifier["width"] = _getIdentifierWidth(current, decimal);
+        _identifier["position"] = _getIdentifierPosition(current, decimal);
+        _setColorLerp(current + 1, decimal);
+      }
+      _setColorLerp(current, 1 - decimal);
+      if (current != _currentPage) _currentPage = current;
+    });
+  }
+
+  double _getProp(int index, String prop) {
+    return _titlesProps[_titles[index]][prop];
+  }
+
+  //----------//
+  //IDENTIFIER//
+  //----------//
+  double _getIdentifierWidth(int page, double decimal) {
+    double floorWidth({int sum = 0}) => _getProp(page + sum, "width");
+    final double width = floorWidth();
+    final double nextWidth = floorWidth(sum: 1);
+    return width + ((nextWidth - width) * decimal);
+  }
+
+  double _getIdentifierPosition(int page, double decimal) {
+    double position = 0;
+    double widthPadding(i) => _getProp(i, "width") + _padding.betweenTitles;
+    if (page != _currentPage) {
+      for (var i = 0; i < page; i++) position += widthPadding(i);
+      _initialPosition = position;
+    } else {
+      position = _initialPosition;
+    }
+    return position + _padding.left + (widthPadding(page) * decimal);
+  }
+
+  //----------//
+  //COLOR LERP//
+  //----------//
   void _clearColorLerp() {
     for (var title in _titles) _titlesProps[title]["lerp"] = 0.0;
   }
@@ -113,47 +168,17 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
     _titlesProps[_titles[index]]["lerp"] = result;
   }
 
-  void _setTitleWidth() {
+  void _titleTapped(int index) async {
+    setState(() => _itemTapped = true);
+    await _pageController.animateToPage(
+      index,
+      curve: Curves.ease,
+      duration: Duration(milliseconds: 400),
+    );
     setState(() {
-      for (var title in _titles) {
-        double width = _titlesProps[title]["key"].currentContext.size.width;
-        _titlesProps[title]["width"] = width;
-      }
-      _identifier["width"] = _getProps(widget.initialPage, "width");
-      _identifier["position"] = _padding.left;
-    });
-  }
-
-  double _getProps(int index, String prop) {
-    return _titlesProps[_titles[index]][prop];
-  }
-
-  double _getIdentifierWidth(double index) {
-    double indexDiff = index - index.floor();
-    double floorWidth({int sum = 0}) => _getProps(index.floor() + sum, "width");
-    return floorWidth() + (floorWidth(sum: 1) - floorWidth()) * indexDiff;
-  }
-
-  double _getIdentifierPosition(double index) {
-    double position = 0;
-    double indexDiff = index - index.floor();
-    double widthPadding(i) => _getProps(i, "width") + _padding.betweenTitles;
-    for (var i = 0; i < index.floor(); i++) position += widthPadding(i);
-    return position + widthPadding(index.floor()) * indexDiff + _padding.left;
-  }
-
-  void _scrollListener() {
-    int currentPage = _pageController.page.floor();
-    double pageDecimal = _pageController.page - currentPage;
-
-    setState(() {
-      if (_itemTapped) _clearColorLerp();
-      if (currentPage + 1 < widget.pages.length) {
-        _identifier["width"] = _getIdentifierWidth(_pageController.page);
-        _identifier["position"] = _getIdentifierPosition(_pageController.page);
-        _setColorLerp(currentPage + 1, pageDecimal);
-      }
-      _setColorLerp(currentPage, 1 - pageDecimal);
+      _itemTapped = false;
+      _clearColorLerp();
+      _setColorLerp(_pageController.page.round(), 1.0);
     });
   }
 
@@ -161,14 +186,12 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: preferredSafeArea(
-          elevation: widget.elevation,
           backgroundColor: widget.backgroundColorNav,
+          elevation: widget.elevation,
           child: _buildScrollTitles()),
-      resizeToAvoidBottomPadding: false,
       body: PageView(controller: _pageController, children: widget.pages),
-      backgroundColor: widget.backgroundColorBody != null
-          ? widget.backgroundColorBody
-          : Colors.grey[100],
+      backgroundColor: widget.backgroundColorBody,
+      resizeToAvoidBottomPadding: false,
     );
   }
 
@@ -215,11 +238,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
             child: Container(
               decoration: BoxDecoration(
                 color: widget.identifierColor,
-                borderRadius: widget.identifierWithBorder
-                    ? BorderRadius.only(
-                        topRight: Radius.circular(10.0),
-                        topLeft: Radius.circular(10.0))
-                    : null,
+                borderRadius: widget.identifierBorderRadius,
               ),
             ),
           ),
