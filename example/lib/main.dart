@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_navigation/scroll_navigation.dart';
@@ -76,22 +78,35 @@ class _HomePageState extends State<HomePage> {
       controllerToHideAppBar: controller,
       leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
       body: TitleScrollNavigation(
-        titles: ["Page 1", "New page", "Second new page"],
+        padding: TitleScrollPadding(right: 40.0, left: 40.0, betweenTitles: 40),
+        titleStyle: TextStyle(fontWeight: FontWeight.bold),
+        titles: [
+          "Main Page",
+          "Personal Information",
+          "Personalization",
+          "Security",
+          "Payment Methods",
+        ],
         pages: [
-          ListView.builder(
-            itemCount: 15,
-            controller: controller,
-            itemBuilder: (context, key) {
-              return Padding(
-                padding: EdgeInsets.symmetric(vertical: 5),
-                child: Container(
-                  height: 50,
-                  color: Colors.blue[50],
-                ),
-              );
-            },
+          Container(
+            color: Colors.white,
+            child: ListView.builder(
+              itemCount: 15,
+              controller: controller,
+              itemBuilder: (context, key) {
+                return Padding(
+                  padding: EdgeInsets.symmetric(vertical: 5),
+                  child: Container(
+                    height: 50,
+                    color: Colors.blue[50],
+                  ),
+                );
+              },
+            ),
           ),
           Container(color: Colors.red[50]),
+          Container(color: Colors.green[50]),
+          Container(color: Colors.purple[50]),
           Container(color: Colors.yellow[50]),
         ],
       ),
