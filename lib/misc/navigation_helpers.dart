@@ -58,7 +58,7 @@ class TitleScrollPadding {
   /// Typical eight-pixel margin on all sides:
   ///
   /// ```dart
-  /// const TitleScrollPadding.all(8.0)
+  ///  TitleScrollPadding.all(8.0)
   /// ```
   /// {@end-tool}
   TitleScrollPadding.all(double amount, {this.betweenTitles = 20}) {
@@ -66,6 +66,27 @@ class TitleScrollPadding {
     right = amount;
     top = amount;
     bottom = amount;
+  }
+
+  /// Creates insets where all the offsets are `value`.
+  ///
+  /// {@tool snippet}
+  ///
+  /// Typical eight-pixel margin on all sides:
+  ///
+  /// ```dart
+  ///  TitleScrollPadding.symmetric(horizontal: 20.0)
+  /// ```
+  /// {@end-tool}
+  TitleScrollPadding.symmetric({
+    double vertical = 10.0,
+    double horizontal = 20.0,
+    this.betweenTitles = 20,
+  }) {
+    left = horizontal;
+    right = horizontal;
+    top = vertical;
+    bottom = vertical;
   }
 
   final double betweenTitles;

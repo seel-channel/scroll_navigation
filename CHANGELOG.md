@@ -1,11 +1,17 @@
+## [1.1.2]
+
+- TitleScrollNavigation optimized.
+- TitleScrollNavigation's Titles will be centered when scrolling.
+- ScrollNavigation fixed bugs and removed titleFontSize and iconSize arguments.
+
 ## [1.1.1]
 
 - Added the option to hide the AppBar on the Screen Widget when assigning a ScrollController.
 
 ## [1.1.0]
 
-- TitleScrollNavigation was added.
-- ScrollNavigation was optimized making it 35% faster.
+- TitleScrollNavigation added.
+- ScrollNavigation optimized making it 35% faster.
 - Some parameters have been improved causing some options from previous versions to be obsolete.
 
 ## [1.0.3]

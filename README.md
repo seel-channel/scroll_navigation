@@ -1,5 +1,12 @@
 # scroll_navigation
 
+## My other APIs
+
+- [Video Viewer](https://pub.dev/packages/video_viewer)
+- [Helpers](https://pub.dev/packages/helpers)
+
+<br>
+
 ## Features
 
 - Scrolling pages by gestures.
@@ -18,21 +25,6 @@
 
 ```dart
 return ScrollNavigation(
-  //DEFAULT VALUES
-  //initialPage = 0,
-  //navigationOnTop = false,
-  //showIdentifier = true,
-  //identifierPhysics = true,
-  //identifierOnBottom = true,
-  //identifierWithBorder = false,
-  //activeColor = Colors.blue,
-  //desactiveColor = Colors.grey,
-  //backgroundBody = Colors.grey[100],
-  //backgroundNav = Colors.white,
-  //verticalPadding = 18,
-  //elevation = 3.0,
-  //navItemIconSize = 24.0,
-  //navItemTitleFontSize = 12.0,
   pages: <Widget>[
     Screen(title: title("Camera")),
     Screen(title: title("Messages"), backgroundColor: Colors.yellow[50]),
@@ -47,7 +39,8 @@ return ScrollNavigation(
     ScrollNavigationItem(icon: Icon(Icons.notifications)),
     ScrollNavigationItem(
       icon: Icon(Icons.home),
-      activeIcon: Icon(Icon: verified_user))
+      activeIcon: Icon(Icon: verified_user),
+    ),
   ],
   pagesActionButtons: <Widget>[
     FloatingActionButton( //PAGE 1
@@ -219,10 +212,20 @@ return Screen(
 
 ```dart
 return TitleScrollNavigation(
-    titles: ["Page 1", "New page", "Second new page"],
+    padding: TitleScrollPadding.symmetric(horizontal: 40.0, betweenTitles: 40),
+    titleStyle: TextStyle(fontWeight: FontWeight.bold),
+    titles: [
+      "Main Page",
+      "Personal Information",
+      "Personalization",
+      "Security",
+      "Payment Methods",
+    ],
     pages: [
       Container(color: Colors.blue[50]),
       Container(color: Colors.red[50]),
+      Container(color: Colors.green[50]),
+      Container(color: Colors.purple[50]),
       Container(color: Colors.yellow[50]),
     ],
 );
