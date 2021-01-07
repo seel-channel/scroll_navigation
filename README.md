@@ -3,19 +3,20 @@
 ## My other APIs
 
 - [Video Viewer](https://pub.dev/packages/video_viewer)
+- [Video Editor](https://pub.dev/packages/video_editor)
 - [Helpers](https://pub.dev/packages/helpers)
 
 <br>
 
 ## Features
 
-- Scrolling pages by gestures.
-- Page movement when tapping an icon.
-- Indicator that follows the scroll.
-- Works with the back button.
 - Fancy animations.
 - Customizable colors.
+- Works with the back button.
+- Scrolling pages by gestures.
+- Indicator that follows the scroll.
 - Easy and powerful implementation! :)
+- Page movement when tapping an icon.
 
 ---
 
@@ -25,14 +26,14 @@
 
 ```dart
 return ScrollNavigation(
-  pages: <Widget>[
+  pages: [
     Screen(title: title("Camera")),
     Screen(title: title("Messages"), backgroundColor: Colors.yellow[50]),
     Screen(title: title("Favor"), body: Container(color: Colors.cyan[50])),
     Screen(title: title("Activity"), backgroundColor: Colors.yellow[50]),
     Screen(title: title("Home"))
   ],
-  navItems: <ScrollNavigationItem>[
+  navItems: const [
     ScrollNavigationItem(icon: Icon(Icons.camera)),
     ScrollNavigationItem(icon: Icon(Icons.chat)),
     ScrollNavigationItem(icon: Icon(Icons.favorite)),
@@ -42,7 +43,7 @@ return ScrollNavigation(
       activeIcon: Icon(Icon: verified_user),
     ),
   ],
-  pagesActionButtons: <Widget>[
+  pagesActionButtons: [
     FloatingActionButton( //PAGE 1
       child: Icon(Icons.receipt),onPressed: () => null
     ),
@@ -68,7 +69,7 @@ return ScrollNavigation(
 
 (It's recommended to set showAppBar = false on the Screen Widget)
 
-|              navigationOnTop = True               |               navigationOnTop = False                |
+|        BarPosition: NavigationPosition.top        |        BarPosition: NavigationPosition.bottom        |
 | :-----------------------------------------------: | :--------------------------------------------------: |
 | ![](assets/readme/scroll_navigation/navOnTop.gif) | ![](assets/readme/scroll_navigation/navOnBottom.gif) |
 
@@ -83,15 +84,14 @@ final navigationKey = GlobalKey<ScrollNavigationState>();
 Widget build(BuildContext context) {
   return ScrollNavigation(
     key: navigationKey,
-    navigationOnTop = true, //Default is false
-    pages: <Widget>[],
-    navItems: <ScrollNavigationItem>[],
+    pages: [...],
+    navItems: [...],
+    barStyle: NavigationBarStyle(position: NavigationPosition.top),
   );
 }
 
-void goToPage(int index) {
-  navigationKey.currentState.goToPage(index);
-}
+void goToPage(int index) => navigationKey.currentState.goToPage(index);
+
 ```
 
 <br><br>
@@ -102,13 +102,13 @@ void goToPage(int index) {
 
 ## Identifier Details
 
-|                  identifierPhysics = True                  |                  identifierPhysics = False                  |
+|                       physics: true                        |                       physics: False                        |
 | :--------------------------------------------------------: | :---------------------------------------------------------: |
 | ![](assets/readme/scroll_navigation/scrollPhysicsTrue.gif) | ![](assets/readme/scroll_navigation/scrollPhysicsFalse.gif) |
 
 <br><br>
 
-|                identifierOnBottom = False                |                    showIdentifier = False                    |
+|        IdentifierPosition: NavigationPosition.top        |                    showIdentifier: False                     |
 | :------------------------------------------------------: | :----------------------------------------------------------: |
 | ![](assets/readme/scroll_navigation/identifierOnTop.gif) | ![](assets/readme/scroll_navigation/showIdentifierFalse.gif) |
 
@@ -118,11 +118,13 @@ void goToPage(int index) {
 
 ```dart
 return ScrollNavigation(
-    showIdentifier = true,
-    identifierPhysics = true,
-    identifierOnBottom = true,
-    pages: <Widget>[],
-    navItems: <ScrollNavigationItem>[],
+    pages: [...],
+    items: [...],
+    physics: true,
+    showIdentifier: true,
+    identiferStyle: NavigationIdentiferStyle(
+      position: NavigationPosition.top,
+    ),
 );
 ```
 
@@ -212,8 +214,11 @@ return Screen(
 
 ```dart
 return TitleScrollNavigation(
-    padding: TitleScrollPadding.symmetric(horizontal: 40.0, betweenTitles: 40),
-    titleStyle: TextStyle(fontWeight: FontWeight.bold),
+    barStyle: TitleNavigationBarStyle(
+      style: TextStyle(fontWeight: FontWeight.bold),
+      padding: EdgeInsets.symmetric(horizontal: 40.0),
+      spaceBetween: 40,
+    ),
     titles: [
       "Main Page",
       "Personal Information",

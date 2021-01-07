@@ -1,3 +1,12 @@
+## [1.2.0]
+
+- PERFORMANCE BOOST!
+- The Navigations Styles separated on classes:
+  - NavigationBarStyle
+  - NavigationBodyStyle
+  - NavigationIndentifierStyle
+  - TitleNavigationBarStyle
+
 ## [1.1.2]
 
 - TitleScrollNavigation optimized.

@@ -82,9 +82,11 @@ class _HomePageState extends State<HomePage> {
       controllerToHideAppBar: controller,
       leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
       body: TitleScrollNavigation(
-        padding: EdgeInsets.symmetric(horizontal: 40.0),
-        spaceBetween: 40,
-        titleStyle: TextStyle(fontWeight: FontWeight.bold),
+        barStyle: TitleNavigationBarStyle(
+          style: TextStyle(fontWeight: FontWeight.bold),
+          padding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 10.0),
+          spaceBetween: 40,
+        ),
         titles: [
           "Main Page",
           "Personal Information",
