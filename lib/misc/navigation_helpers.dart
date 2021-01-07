@@ -1,9 +1,12 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
+enum NavigationPosition { top, bottom }
+
 class ScrollNavigationItem {
-  /// Creates an item that is used with [ScrollNavigation.navItems].
+  /// Creates an item that is used with [ScrollNavigation.items].
   /// The argument [icon] should not be null and the argument [title] if null or empty don't show it.
-  ScrollNavigationItem({
+  const ScrollNavigationItem({
     this.icon,
     this.title,
     this.titleStyle,
@@ -32,63 +35,74 @@ class ScrollNavigationItem {
   final TextStyle titleStyle;
 }
 
-class TitleScrollPadding {
-  /// Creates insets with only the given values non-zero.
-  ///
-  /// {@tool snippet}
-  ///
-  /// Left margin indent of 40 pixels:
-  ///
-  /// ```dart
-  /// const TitleScrollPadding(left: 40.0)
-  /// ```
-  /// {@end-tool}
-  TitleScrollPadding({
-    this.left = 10.0,
-    this.top = 10.0,
-    this.right = 10.0,
-    this.bottom = 10.0,
-    this.betweenTitles = 20,
+class NavigationBarStyle {
+  const NavigationBarStyle({
+    this.elevation = 3.0,
+    this.background = Colors.white,
+    this.activeColor = Colors.blue,
+    this.deactiveColor = Colors.black26,
+    this.verticalPadding = 20.0,
+    this.position = NavigationPosition.bottom,
   });
 
-  /// Creates insets where all the offsets are `value`.
-  ///
-  /// {@tool snippet}
-  ///
-  /// Typical eight-pixel margin on all sides:
-  ///
-  /// ```dart
-  ///  TitleScrollPadding.all(8.0)
-  /// ```
-  /// {@end-tool}
-  TitleScrollPadding.all(double amount, {this.betweenTitles = 20}) {
-    left = amount;
-    right = amount;
-    top = amount;
-    bottom = amount;
-  }
+  ///Box shadow y-elevation
+  final double elevation;
 
-  /// Creates insets where all the offsets are `value`.
-  ///
-  /// {@tool snippet}
-  ///
-  /// Typical eight-pixel margin on all sides:
-  ///
-  /// ```dart
-  ///  TitleScrollPadding.symmetric(horizontal: 20.0)
-  /// ```
-  /// {@end-tool}
-  TitleScrollPadding.symmetric({
-    double vertical = 10.0,
-    double horizontal = 20.0,
-    this.betweenTitles = 20,
-  }) {
-    left = horizontal;
-    right = horizontal;
-    top = vertical;
-    bottom = vertical;
-  }
+  ///Background color
+  final Color background;
 
-  final double betweenTitles;
-  double left, right, top, bottom;
+  /// It is the color that the active icon and indicator will show.
+  final Color activeColor;
+
+  ///It's the color that will have icons that are not active.
+  final Color deactiveColor;
+
+  ///It's the vertical padding that the navItem have.
+  final double verticalPadding;
+
+  ///Change navigation position. Default is at the Bottom.
+  final NavigationPosition position;
+}
+
+class NavigationBodyStyle {
+  const NavigationBodyStyle({
+    this.background,
+    this.borderRadius = BorderRadius.zero,
+    this.physics,
+    this.dragStartBehavior = DragStartBehavior.start,
+  });
+
+  ///Background color
+  final Color background;
+
+  ///ClipRRect border radius
+  final BorderRadiusGeometry borderRadius;
+
+  ///How the page view should respond to user input.
+  ///For example, determines how the page view continues to animate after the user stops dragging the page view.
+  ///The physics are modified to snap to page boundaries using [PageScrollPhysics] prior to being used.
+  ///Defaults to matching platform conventions.
+  final ScrollPhysics physics;
+
+  ///[PageView] propierty
+  final DragStartBehavior dragStartBehavior;
+}
+
+class NavigationIdentiferStyle {
+  const NavigationIdentiferStyle({
+    this.color = Colors.blue,
+    this.position = NavigationPosition.bottom,
+    BorderRadiusGeometry borderRadius,
+  }) : this.borderRadius = borderRadius ?? position == NavigationPosition.bottom
+            ? const BorderRadius.vertical(top: Radius.circular(10.0))
+            : const BorderRadius.vertical(bottom: Radius.circular(10.0));
+
+  //Identifier color
+  final Color color;
+
+  ///Will show the identifier at the navBar bottom or at the top of the navBar.
+  final NavigationPosition position;
+
+  ///Show a circular border radius else show a simple rectangle.
+  final BorderRadiusGeometry borderRadius;
 }
