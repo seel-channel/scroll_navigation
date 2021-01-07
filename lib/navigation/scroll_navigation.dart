@@ -1,42 +1,32 @@
+import 'package:helpers/helpers.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:scroll_navigation/misc/screen.dart';
 import 'package:scroll_navigation/misc/navigation_helpers.dart';
 
 class ScrollNavigation extends StatefulWidget {
   /// It is a navigation that will allow you to scroll from right to left with gestures
   /// and also when pressing an item in the Nav Item.
   ///
-  /// You need 2 elements: Pages and NavItems.
+  /// You need 2 elements: Pages and items.
   ///
-  /// Pages and NavItems must have the same number of elements.
+  /// Pages and items must have the same number of elements.
   ScrollNavigation({
     Key key,
     this.pages,
-    this.navItems,
+    this.items,
     this.pagesActionButtons,
     this.initialPage = 0,
-    this.navigationOnTop = false,
     this.showIdentifier = true,
-    this.identifierPhysics = true,
-    this.identifierOnBottom = true,
-    BorderRadiusGeometry identifierBorderRadius,
-    this.activeColor = Colors.blue,
-    this.desactiveColor = Colors.grey,
-    this.backgroundBody,
-    this.backgroundNav = Colors.white,
-    this.verticalPadding = 18,
-    this.elevation = 3.0,
-  })  : assert(navItems != null && pages != null),
-        assert(navItems.length == pages.length),
-        this.identifierBorderRadius =
-            identifierBorderRadius ?? identifierOnBottom
-                ? BorderRadius.only(
-                    topRight: Radius.circular(10.0),
-                    topLeft: Radius.circular(10.0))
-                : BorderRadius.only(
-                    bottomRight: Radius.circular(10.0),
-                    bottomLeft: Radius.circular(10.0)),
+    this.physics = true,
+    this.maxWillPopLocations = 5,
+    NavigationBarStyle barStyle,
+    NavigationBodyStyle bodyStyle,
+    NavigationIdentiferStyle identiferStyle,
+  })  : assert(items != null && pages != null),
+        assert(items.length == pages.length),
+        this.barStyle = barStyle ?? NavigationBarStyle(),
+        this.bodyStyle = bodyStyle ?? NavigationBodyStyle(),
+        this.identiferStyle = identiferStyle ?? NavigationIdentiferStyle(),
         super(key: key);
 
   /// It is the initial page that will show. The value must match
@@ -50,71 +40,66 @@ class ScrollNavigation extends StatefulWidget {
   ///To separate pages you can put: Widget, null, Widget
   final List<Widget> pagesActionButtons;
 
-  /// It is the color that the active icon and indicator will show.
-  final Color activeColor;
-
-  ///Change navigation position. Default is at the Bottom [false].
-  final bool navigationOnTop;
-
-  ///It's the color that will have icons that are not active.
-  final Color desactiveColor;
-
   ///They are the list of elements that the menu will have.
   ///They must match the total number of pages.
-  final List<ScrollNavigationItem> navItems;
-
-  ///When active, the indicator will move along with the scroll of the pages.
-  ///Of other way, it will only move when you change page.
-  final bool identifierPhysics;
+  final List<ScrollNavigationItem> items;
 
   ///It will show the identifier.
   ///If false, the argument [identifierPhysics] will be ignored
   final bool showIdentifier;
 
-  ///Show a circular border radius else show a simple rectangle.
-  final BorderRadiusGeometry identifierBorderRadius;
+  ///When active, the indicator will move along with the scroll of the pages.
+  ///Of other way, it will only move when you change page.
+  final bool physics;
 
-  ///If true, will show the identifier at the navBar bottom.
-  ///Else, at the top of the navBar.
-  final bool identifierOnBottom;
+  ///Navigation bar style
+  final NavigationBarStyle barStyle;
 
-  ///Boxshadow Y-Offset. If 0 don't show the BoxShadow
-  final double elevation;
+  ///PageView and Scaffold style
+  final NavigationBodyStyle bodyStyle;
 
-  ///It's the vertical padding that the navItem have.
-  final double verticalPadding;
+  ///Identifier style
+  final NavigationIdentiferStyle identiferStyle;
 
-  ///Colooooors :D
-  final Color backgroundNav, backgroundBody;
+  ///It is the maximum number of locations that will be stored before willPop is executed
+  final int maxWillPopLocations;
 
   @override
   ScrollNavigationState createState() => ScrollNavigationState();
 }
 
 class ScrollNavigationState extends State<ScrollNavigation> {
-  double _navTopHeight = 0;
-  int _bottomIndex = 0;
-  int _maxItemsCache = 5;
-  bool _identifierPhysics;
+  final ValueNotifier<double> _identifierPosition = ValueNotifier<double>(0.0);
+
+  int _maxItemsCache;
+  int _currentIndex = 0;
   bool _itemTapped = false;
+  double _identifierWidth = 0.0;
+
+  List<int> _popUpCache = [];
+  List<Widget> _navIcons = [];
+  List<Widget> _navTexts = [];
+  List<Widget> _pagesActionButtons = [];
+
   Orientation _orientation;
-  PageController _pageController;
-  GlobalKey _navigationKey = GlobalKey();
-  Cubic _animationCurve = Curves.linearToEaseOut;
-  List<int> _popUpCache = List();
-  Map<String, double> _identifier = Map();
-  List<Widget> _pagesActionButtons = List();
-  List<Map<String, dynamic>> _itemProps = List();
+  PageController _controller;
+  NavigationBarStyle _barStyle;
+  NavigationBodyStyle _bodyStyle;
+  NavigationIdentiferStyle _identifierStyle;
 
   ///Go to a page :)
   void goToPage(int index) => _onBottomItemTapped(index);
 
   @override
   void initState() {
-    _bottomIndex = widget.initialPage;
-    _pageController = PageController(initialPage: widget.initialPage);
-    _identifierPhysics = widget.identifierPhysics;
-    _pageController.addListener(_scrollListener);
+    _barStyle = widget.barStyle;
+    _bodyStyle = widget.bodyStyle;
+    _currentIndex = widget.initialPage;
+    _maxItemsCache = widget.maxWillPopLocations ?? 5;
+    _identifierStyle = widget.identiferStyle;
+
+    _controller = PageController(initialPage: widget.initialPage);
+    _controller.addListener(_scrollListener);
     _popUpCache.add(widget.initialPage);
 
     //FILL FLOATING ACTION BUTTONS ON _pagesActionButtons
@@ -127,62 +112,39 @@ class ScrollNavigationState extends State<ScrollNavigation> {
             : _pagesActionButtons.add(null);
       }
     }
-    for (int i = 0; i < widget.navItems.length; i++) {
-      _itemProps.add({"lerp": 0.0});
-    }
 
-    //SET HEIGHT FOR NAVIGATIONONTOP
-    if (widget.navigationOnTop)
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        double maxFontSize = 0;
-        double maxIconSize = 0;
-        int itemsWithTitle = 0;
-        for (ScrollNavigationItem item in widget.navItems) {
-          final Icon icon = item.icon;
-          final TextStyle style = item.titleStyle;
-          final double fontSize = style != null ? style.fontSize : 0.0;
-          final double iconSize =
-              icon != null ? icon.size ?? IconTheme.of(context).size : 0.0;
-          if (item.title != null && item.title.isNotEmpty) itemsWithTitle += 1;
-          if (fontSize > maxFontSize) maxFontSize = fontSize;
-          if (iconSize > maxIconSize) maxIconSize = iconSize;
-        }
-        final double spaceBeetween = itemsWithTitle == 0 ? 0 : 5;
-        final double titleHeight = itemsWithTitle == 0 ? 0 : maxFontSize;
-        final double heightItem = (widget.verticalPadding * 2) +
-            maxIconSize +
-            titleHeight +
-            spaceBeetween;
-        setState(() => _navTopHeight = heightItem);
-      });
+    for (int i = 0; i < widget.items.length; i++) {
+      final item = widget.items[i];
+      _navIcons.add(item.icon);
+      _navTexts.add(item.title != null && item.title.isNotEmpty
+          ? Text(
+              item.title,
+              overflow: TextOverflow.ellipsis,
+              style: item.titleStyle,
+            )
+          : SizedBox());
+    }
     super.initState();
   }
 
   @override
   void dispose() {
-    _pageController.removeListener(_scrollListener);
+    _controller.removeListener(_scrollListener);
     super.dispose();
   }
 
   void _scrollListener() {
-    double page = _pageController.page;
-    int currentPage = page.floor();
-    setState(() {
-      if (_identifierPhysics) {
-        if (_itemTapped) _clearColorLerp();
-        if (currentPage + 1 < widget.pages.length)
-          _setColorLerp(currentPage + 1, (page - currentPage));
-        _setColorLerp(currentPage, 1 - (page - currentPage));
-        if (widget.showIdentifier)
-          _identifier["position"] = _identifier["width"] * page;
-      } else {
-        _clearColorLerp();
-        _setColorLerp(page.round(), 1.0);
-        if (widget.showIdentifier)
-          _identifier["position"] = _identifier["width"] * page.round();
-      }
-      _bottomIndex = page.round();
-    });
+    final double page = _controller.page;
+    final int currentPage = page.floor();
+
+    if (widget.physics) {
+      if (_itemTapped) _clearItemLerp();
+      if (currentPage + 1 < widget.pages.length)
+        _setItemLerp(currentPage + 1, (page - currentPage));
+      _setItemLerp(currentPage, 1 - (page - currentPage));
+      if (widget.showIdentifier)
+        _identifierPosition.value = _identifierWidth * page;
+    }
   }
 
   //---------//
@@ -199,34 +161,66 @@ class ScrollNavigationState extends State<ScrollNavigation> {
   }
 
   void _onBottomItemTapped(int index) async {
-    if (_bottomIndex != index) {
+    if (_currentIndex != index) {
       setState(() {
         _itemTapped = true;
         _popUpCache.add(index);
       });
-      await _pageController.animateToPage(
+      await _controller.animateToPage(
         index,
+        curve: Curves.linearToEaseOut,
         duration: Duration(milliseconds: 500),
-        curve: _animationCurve,
       );
       setState(() {
         _itemTapped = false;
-        _clearColorLerp();
-        _setColorLerp(_bottomIndex, 1.0);
+        _clearItemLerp();
+        _setItemLerp(_currentIndex, 1.0);
       });
     }
   }
 
-  //----------//
-  //COLOR LERP//
-  //----------//
-  void _clearColorLerp() {
-    for (int i = 0; i < widget.navItems.length; i++)
-      _itemProps[i]["lerp"] = 0.0;
+  void _onPageChanged(index) {
+    setState(() {
+      if (!widget.physics) {
+        _clearItemLerp();
+        _setItemLerp(index, 1.0);
+        if (widget.showIdentifier)
+          _identifierPosition.value = _identifierWidth * index;
+      }
+      if (_popUpCache.length > _maxItemsCache) _popUpCache.removeAt(0);
+      if (!_itemTapped) _popUpCache.add(index);
+      _currentIndex = index;
+    });
   }
 
-  void _setColorLerp(int index, double result) {
-    _itemProps[index]["lerp"] = result;
+  //----------//
+  //ITEMS LERP//
+  //----------//
+  void _setItemLerp(int index, double lerp) {
+    final item = widget.items[index];
+    final color = Color.lerp(
+      _barStyle.deactiveColor,
+      _barStyle.activeColor,
+      lerp,
+    );
+    _navIcons[index] = IconTheme.merge(
+      data: IconThemeData(color: color),
+      child: item.activeIcon == null
+          ? item.icon
+          : lerp > 0.5
+              ? item.activeIcon
+              : item.icon,
+    );
+    if (item.title != null && item.title.isNotEmpty)
+      _navTexts[index] = Text(
+        item.title,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(color: color).merge(item.titleStyle),
+      );
+  }
+
+  void _clearItemLerp() {
+    for (int i = 0; i < widget.items.length; i++) _setItemLerp(i, 0.0);
   }
 
   @override
@@ -236,39 +230,38 @@ class ScrollNavigationState extends State<ScrollNavigation> {
       child: OrientationBuilder(
         builder: (_, Orientation orientation) {
           if (_orientation == null || _orientation != orientation) {
-            double width = MediaQuery.of(context).size.width;
-            width = width * (1 / widget.navItems.length);
+            double width = GetMedia(context).width * (1 / widget.items.length);
             _orientation = orientation;
-            _identifier["width"] = width;
-            _identifier["position"] = width * _bottomIndex;
-            _setColorLerp(_bottomIndex, 1.0);
+            _identifierWidth = width;
+            _identifierPosition.value = width * _currentIndex;
+            _setItemLerp(_currentIndex, 1.0);
           }
 
           return Scaffold(
-            appBar: widget.navigationOnTop
-                ? preferredSafeArea(
-                    height: _navTopHeight,
-                    elevation: widget.elevation,
-                    backgroundColor: widget.backgroundNav,
-                    child: _buildBottomNavigation(elevation: widget.elevation))
-                : null,
-            body: PageView(
-              children: widget.pages,
-              controller: _pageController,
-              onPageChanged: (index) => setState(() {
-                if (_popUpCache.length > _maxItemsCache)
-                  _popUpCache.removeAt(0);
-                if (!_itemTapped) _popUpCache.add(index);
-              }),
-            ),
-            bottomNavigationBar: !widget.navigationOnTop
-                ? _buildBottomNavigation(elevation: 1 - widget.elevation)
-                : null,
-            backgroundColor: widget.backgroundBody != null
-                ? widget.backgroundBody
-                : Colors.grey[100],
-            floatingActionButton: _pagesActionButtons[_bottomIndex],
+            body: Column(children: [
+              if (_barStyle.position == NavigationPosition.top)
+                SafeAreaColor(
+                  color: _barStyle.background,
+                  child: _buildBottomNavigation(elevation: _barStyle.elevation),
+                ),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: _bodyStyle.borderRadius,
+                  child: PageView(
+                    physics: _bodyStyle.physics,
+                    children: widget.pages,
+                    controller: _controller,
+                    onPageChanged: _onPageChanged,
+                    dragStartBehavior: _bodyStyle.dragStartBehavior,
+                  ),
+                ),
+              ),
+              if (_barStyle.position == NavigationPosition.bottom)
+                _buildBottomNavigation(elevation: 1 - _barStyle.elevation)
+            ]),
+            floatingActionButton: _pagesActionButtons[_currentIndex],
             resizeToAvoidBottomPadding: false,
+            backgroundColor: _bodyStyle.background,
           );
         },
       ),
@@ -276,100 +269,63 @@ class ScrollNavigationState extends State<ScrollNavigation> {
   }
 
   Widget _buildBottomNavigation({double elevation}) {
-    return Stack(
-      children: <Widget>[
-        Container(
-          key: _navigationKey,
-          decoration: BoxDecoration(
-            color: widget.backgroundNav,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                spreadRadius: -3,
-                blurRadius: 2,
-                offset: Offset(0, elevation),
-              ),
-            ],
-          ),
-          child: Row(children: _buildNavIcon()),
-        ),
-        if (widget.showIdentifier) _buildIdentifier()
-      ],
-    );
-  }
-
-  Widget _buildIdentifier() {
-    return AnimatedPositioned(
-      height: 3.0,
-      width: _identifier["width"],
-      left: _identifier["position"],
-      bottom: widget.identifierOnBottom ? 0 : null,
-      duration: _identifierPhysics
-          ? Duration(milliseconds: 0)
-          : Duration(milliseconds: 200),
-      curve: _animationCurve,
-      child: Container(
+    return Stack(children: [
+      //NAVIGATION BAR
+      Container(
         decoration: BoxDecoration(
-          color: widget.activeColor,
-          borderRadius: widget.identifierBorderRadius,
+          color: _barStyle.background,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: -3,
+              blurRadius: 2,
+              offset: Offset(0, elevation),
+            ),
+          ],
+        ),
+
+        ///ICONS
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (_, __) => Row(children: [
+            for (int i = 0; i < widget.items.length; i++)
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _onBottomItemTapped(i),
+                  child: Container(
+                    color: _barStyle.background,
+                    padding: EdgeInsets.symmetric(
+                        vertical: _barStyle.verticalPadding),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [_navIcons[i], _navTexts[i]],
+                    ),
+                  ),
+                ),
+              )
+          ]),
         ),
       ),
-    );
-  }
 
-  List<Widget> _buildNavIcon() {
-    return [
-      ...widget.navItems.asMap().entries.map((item) {
-        final int key = item.key;
-        final double lerp = _itemProps[key]["lerp"];
-        final ScrollNavigationItem value = item.value;
-
-        Color colorLerp() {
-          return Color.lerp(widget.desactiveColor, widget.activeColor, lerp);
-        }
-
-        Widget iconMerged() {
-          return IconTheme.merge(
-            key: ValueKey<int>(key),
-            child: value.activeIcon == null
-                ? value.icon
-                : lerp > 0.6
-                    ? value.activeIcon
-                    : value.icon,
-            data: IconThemeData(color: colorLerp()),
-          );
-        }
-
-        Widget textMerged() {
-          return Text(
-            value.title,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: colorLerp()).merge(value.titleStyle),
-          );
-        }
-
-        return Expanded(
-          child: GestureDetector(
-            onTap: () => _onBottomItemTapped(key),
+      //IDENTIFIER
+      if (widget.showIdentifier)
+        ValueListenableBuilder<double>(
+          valueListenable: _identifierPosition,
+          builder: (_, double value, ___) => Positioned(
+            left: value,
+            width: _identifierWidth,
+            height: 3.0,
+            bottom: _identifierStyle.position == NavigationPosition.bottom
+                ? 0
+                : null,
             child: Container(
-              color: widget.backgroundNav,
-              padding: EdgeInsets.symmetric(vertical: widget.verticalPadding),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  widget.navigationOnTop
-                      ? Expanded(child: iconMerged())
-                      : iconMerged(),
-                  if (value.title != null && value.title.isNotEmpty)
-                    widget.navigationOnTop
-                        ? Expanded(child: textMerged())
-                        : textMerged(),
-                ],
+              decoration: BoxDecoration(
+                color: _identifierStyle.color,
+                borderRadius: _identifierStyle.borderRadius,
               ),
             ),
           ),
-        );
-      })
-    ];
+        ),
+    ]);
   }
 }
