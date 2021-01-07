@@ -64,6 +64,39 @@ class NavigationBarStyle {
   final NavigationPosition position;
 }
 
+class NavigationTitleBarStyle {
+  const NavigationTitleBarStyle({
+    this.style,
+    this.padding = const EdgeInsets.all(20.0),
+    this.elevation = 3.0,
+    this.background = Colors.white,
+    this.activeColor = Colors.blue,
+    this.spaceBetween = 20.0,
+    this.deactiveColor = Colors.black26,
+  });
+
+  /// It is Titles style
+  final TextStyle style;
+
+  /// It is the color that the active title will show.
+  final Color activeColor;
+
+  /// It is the color that the desactive title will show.
+  final Color deactiveColor;
+
+  ///Boxshadow Y-Offset. If 0 don't show the BoxShadow
+  final double elevation;
+
+  ///Colooooors :D
+  final Color background;
+
+  ///It is the padding between titles.
+  final double spaceBetween;
+
+  ///It's the padding will have the titles container
+  final EdgeInsets padding;
+}
+
 class NavigationBodyStyle {
   const NavigationBodyStyle({
     this.background,

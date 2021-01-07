@@ -3,33 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-///Returns a Preferred Size widget for an AppBar,
-///allowing to display content below the statusbar of the device
-PreferredSize preferredSafeArea({
-  Widget child,
-  Color backgroundColor = Colors.white,
-  double height = 84,
-  double elevation = 3,
-}) {
-  return PreferredSize(
-    preferredSize: Size.fromHeight(height),
-    child: Container(
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            spreadRadius: -3,
-            blurRadius: 2,
-            offset: Offset(0, elevation),
-          ),
-        ],
-      ),
-      child: SafeArea(child: child),
-    ),
-  );
-}
-
 class ScreenReturnButton extends StatelessWidget {
   ///It's a simple icon that serves as a return button,
   ///It's function is to close the context.
@@ -137,15 +110,14 @@ class _ScreenState extends State<Screen> {
 
   @override
   void dispose() {
-    if (widget.controllerToHideAppBar != null) {
+    if (widget.controllerToHideAppBar != null)
       _controller.removeListener(changeAppBarHeight);
-    }
     super.dispose();
   }
 
   void changeAppBarHeight() {
-    AxisDirection axisDirection = _controller.position.axisDirection;
     ScrollDirection direction = _controller.position.userScrollDirection;
+    AxisDirection axisDirection = _controller.position.axisDirection;
 
     if (axisDirection == AxisDirection.up ||
         axisDirection == AxisDirection.down) {
@@ -173,11 +145,8 @@ class _ScreenState extends State<Screen> {
   void setHeight(double toValue) {
     double lerp = (_offsetRef - _controller.offset) / widget.offsetToHideAppBar;
     lerp = lerp.abs();
-    if (lerp <= 1.0) {
-      setState(() {
-        _height = lerpDouble(_heightRef, toValue, lerp);
-      });
-    }
+    if (lerp <= 1.0)
+      setState(() => _height = lerpDouble(_heightRef, toValue, lerp));
   }
 
   @override
@@ -192,50 +161,76 @@ class _ScreenState extends State<Screen> {
 
   Widget appBar(BuildContext context) {
     double paddingConst = MediaQuery.of(context).size.width * 0.05;
-    return preferredSafeArea(
-        elevation: widget.elevation,
-        backgroundColor: widget.backgroundColor,
-        height: _height,
-        child: Opacity(
-          opacity: Interval(
-            0.2,
-            1.0,
-            curve: Curves.ease,
-          ).transform(_height / widget.height),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: paddingConst),
-            child: widget.centerTitle
-                ? Stack(alignment: AlignmentDirectional.centerStart, children: [
-                    Center(child: widget.title),
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: widget.leftWidget,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [Container(child: widget.rightWidget)],
-                    ),
-                  ])
-                : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: widget.leftWidget == null
-                          ? null
-                          : Padding(
-                              padding: EdgeInsets.only(right: paddingConst),
-                              child: widget.leftWidget),
-                    ),
-                    Expanded(flex: 70, child: widget.title),
-                    Align(
-                      alignment: AlignmentDirectional.centerEnd,
-                      child: widget.rightWidget == null
-                          ? null
-                          : Padding(
-                              padding: EdgeInsets.only(left: paddingConst),
-                              child: widget.rightWidget),
-                    ),
-                  ]),
-          ),
-        ));
+    return _preferredSafeArea(
+      elevation: widget.elevation,
+      backgroundColor: widget.backgroundColor,
+      height: _height,
+      child: Opacity(
+        opacity: Interval(
+          0.2,
+          1.0,
+          curve: Curves.ease,
+        ).transform(_height / widget.height),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: paddingConst),
+          child: widget.centerTitle
+              ? Stack(alignment: AlignmentDirectional.centerStart, children: [
+                  Center(child: widget.title),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: widget.leftWidget,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [Container(child: widget.rightWidget)],
+                  ),
+                ])
+              : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: widget.leftWidget == null
+                        ? null
+                        : Padding(
+                            padding: EdgeInsets.only(right: paddingConst),
+                            child: widget.leftWidget),
+                  ),
+                  Expanded(flex: 70, child: widget.title),
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: widget.rightWidget == null
+                        ? null
+                        : Padding(
+                            padding: EdgeInsets.only(left: paddingConst),
+                            child: widget.rightWidget),
+                  ),
+                ]),
+        ),
+      ),
+    );
+  }
+
+  PreferredSize _preferredSafeArea({
+    Widget child,
+    Color backgroundColor = Colors.white,
+    double height = 84,
+    double elevation = 3,
+  }) {
+    return PreferredSize(
+      preferredSize: Size.fromHeight(height),
+      child: Container(
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.3),
+              spreadRadius: -3,
+              blurRadius: 2,
+              offset: Offset(0, elevation),
+            ),
+          ],
+        ),
+        child: SafeArea(child: child),
+      ),
+    );
   }
 }
