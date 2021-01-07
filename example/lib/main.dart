@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
         Screen(title: title("Activity"), backgroundColor: Colors.yellow[50]),
         Screen(title: title("Home"))
       ],
-      navItems: [
+      items: const [
         ScrollNavigationItem(icon: Icon(Icons.camera)),
         ScrollNavigationItem(icon: Icon(Icons.chat)),
         ScrollNavigationItem(icon: Icon(Icons.favorite)),
@@ -82,7 +82,8 @@ class _HomePageState extends State<HomePage> {
       controllerToHideAppBar: controller,
       leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
       body: TitleScrollNavigation(
-        padding: TitleScrollPadding(right: 40.0, left: 40.0, betweenTitles: 40),
+        padding: EdgeInsets.symmetric(horizontal: 40.0),
+        spaceBetween: 40,
         titleStyle: TextStyle(fontWeight: FontWeight.bold),
         titles: [
           "Main Page",
