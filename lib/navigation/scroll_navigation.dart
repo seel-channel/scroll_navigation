@@ -45,7 +45,7 @@ class ScrollNavigation extends StatefulWidget {
   final List<ScrollNavigationItem> items;
 
   ///It will show the identifier.
-  ///If false, the argument [identifierPhysics] will be ignored
+  ///If false, the argument [physics] will be ignored
   final bool showIdentifier;
 
   ///When active, the indicator will move along with the scroll of the pages.
@@ -123,7 +123,10 @@ class ScrollNavigationState extends State<ScrollNavigation> {
               style: item.titleStyle,
             )
           : SizedBox());
+      _setItemLerp(i, 0.0);
     }
+
+    _setItemLerp(_currentIndex, 1.0);
     super.initState();
   }
 
@@ -256,9 +259,10 @@ class ScrollNavigationState extends State<ScrollNavigation> {
                   ),
                 ),
               ),
-              if (_barStyle.position == NavigationPosition.bottom)
-                _buildBottomNavigation(elevation: 1 - _barStyle.elevation)
             ]),
+            bottomNavigationBar: _barStyle.position == NavigationPosition.bottom
+                ? _buildBottomNavigation(elevation: 1 - _barStyle.elevation)
+                : null,
             floatingActionButton: _pagesActionButtons[_currentIndex],
             resizeToAvoidBottomPadding: false,
             backgroundColor: _bodyStyle.background,
