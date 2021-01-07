@@ -64,8 +64,8 @@ class NavigationBarStyle {
   final NavigationPosition position;
 }
 
-class NavigationTitleBarStyle {
-  const NavigationTitleBarStyle({
+class TitleNavigationBarStyle {
+  const TitleNavigationBarStyle({
     this.style,
     this.padding = const EdgeInsets.all(20.0),
     this.elevation = 3.0,

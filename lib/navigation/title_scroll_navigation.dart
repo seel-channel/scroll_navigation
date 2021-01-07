@@ -14,27 +14,37 @@ class TitleScrollNavigation extends StatefulWidget {
     this.titles,
     this.pages,
     this.initialPage = 0,
+    this.showIdentifier = true,
     NavigationBodyStyle bodyStyle,
-    NavigationTitleBarStyle barStyle,
+    TitleNavigationBarStyle barStyle,
     NavigationIdentiferStyle identiferStyle,
   })  : assert(titles != null && pages != null),
         assert(titles.length == pages.length),
-        this.barStyle = barStyle ?? NavigationTitleBarStyle(),
+        this.barStyle = barStyle ?? TitleNavigationBarStyle(),
         this.bodyStyle = bodyStyle ?? NavigationBodyStyle(),
         this.identiferStyle = identiferStyle ?? NavigationIdentiferStyle(),
         super(key: key);
 
+  /// Are the titles than show it
   final List<String> titles;
 
-  /// Are the pages that the Scroll Page will have
+  /// Are the pages that the PageView will have
   final List<Widget> pages;
 
   /// It is the initial page that will show. The value must match
   /// with the existing indexes and the total number of Nav Items
   final int initialPage;
 
+  ///It will show the identifier.
+  final bool showIdentifier;
+
+  ///Title Navigation bar style
+  final TitleNavigationBarStyle barStyle;
+
+  ///PageView and Scaffold style
   final NavigationBodyStyle bodyStyle;
-  final NavigationTitleBarStyle barStyle;
+
+  ///Identifier style
   final NavigationIdentiferStyle identiferStyle;
 
   @override
@@ -230,19 +240,20 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
               ]
             ]),
           ),
-          AnimatedPositioned(
-            bottom: 0,
-            height: 3.0,
-            width: _identifier["width"],
-            left: _identifier["position"],
-            duration: Duration(milliseconds: 0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: widget.identiferStyle.color,
-                borderRadius: widget.identiferStyle.borderRadius,
+          if (widget.showIdentifier)
+            AnimatedPositioned(
+              bottom: 0,
+              height: 3.0,
+              width: _identifier["width"],
+              left: _identifier["position"],
+              duration: Duration(milliseconds: 0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: widget.identiferStyle.color,
+                  borderRadius: widget.identiferStyle.borderRadius,
+                ),
               ),
             ),
-          ),
         ]),
       ),
     );
