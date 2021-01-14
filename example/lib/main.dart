@@ -24,32 +24,29 @@ class EasyHorizontalNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: ScrollNavigation(
-        initialPage: 4,
-        bodyStyle: NavigationBodyStyle(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
-        ),
-        barStyle: NavigationBarStyle(
-          background: Colors.white,
-          elevation: 0.0,
-        ),
-        pages: [
-          Container(color: Colors.blue[100]),
-          Container(color: Colors.green[100]),
-          Container(color: Colors.purple[100]),
-          Container(color: Colors.amber[100]),
-          Container(color: Colors.deepOrange[100])
-        ],
-        items: const [
-          ScrollNavigationItem(icon: Icon(Icons.camera)),
-          ScrollNavigationItem(icon: Icon(Icons.chat)),
-          ScrollNavigationItem(icon: Icon(Icons.favorite)),
-          ScrollNavigationItem(icon: Icon(Icons.notifications)),
-          ScrollNavigationItem(icon: Icon(Icons.home))
-        ],
+    return ScrollNavigation(
+      bodyStyle: NavigationBodyStyle(
+        background: Colors.white,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
       ),
+      barStyle: NavigationBarStyle(
+        background: Colors.white,
+        elevation: 0.0,
+      ),
+      pages: [
+        Container(color: Colors.blue[100]),
+        Container(color: Colors.green[100]),
+        Container(color: Colors.purple[100]),
+        Container(color: Colors.amber[100]),
+        Container(color: Colors.deepOrange[100])
+      ],
+      items: const [
+        ScrollNavigationItem(icon: Icon(Icons.camera)),
+        ScrollNavigationItem(icon: Icon(Icons.chat)),
+        ScrollNavigationItem(icon: Icon(Icons.favorite)),
+        ScrollNavigationItem(icon: Icon(Icons.notifications)),
+        ScrollNavigationItem(icon: Icon(Icons.home))
+      ],
     );
   }
 }
@@ -60,7 +57,6 @@ class EasyVerticalNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScrollNavigation(
-      initialPage: 4,
       bodyStyle: NavigationBodyStyle(
         background: Colors.white,
         borderRadius: BorderRadius.horizontal(left: Radius.circular(20)),
