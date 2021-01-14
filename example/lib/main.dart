@@ -19,6 +19,9 @@ class App extends StatelessWidget {
   }
 }
 
+//-------------//
+//EASY EXAMPLES//
+//-------------//
 class EasyHorizontalNavigation extends StatelessWidget {
   const EasyHorizontalNavigation({Key key}) : super(key: key);
 
@@ -85,13 +88,16 @@ class EasyVerticalNavigation extends StatelessWidget {
   }
 }
 
-class HomePage extends StatefulWidget {
+//----------------//
+//ADVANCED EXAMPLE//
+//----------------//
+class AdvancedNavigation extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _AdvancedNavigationState createState() => _AdvancedNavigationState();
 }
 
-class _HomePageState extends State<HomePage> {
-  ScrollController controller = ScrollController();
+class _AdvancedNavigationState extends State<AdvancedNavigation> {
+  final ScrollController controller = ScrollController();
   final navigationKey = GlobalKey<ScrollNavigationState>();
 
   @override

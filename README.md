@@ -24,9 +24,9 @@
 
 ## Scroll Navigation Details
 
-|              NavigationPosition.top               |              NavigationPosition.bottom               |
-| :-----------------------------------------------: | :--------------------------------------------------: |
-| ![](assets/readme/scroll_navigation/navOnTop.gif) | ![](assets/readme/scroll_navigation/navOnBottom.gif) |
+|                NavigationPosition.bottom                |                NavigationPosition.top                |
+| :-----------------------------------------------------: | :--------------------------------------------------: |
+| ![](assets/readme/scroll_navigation/BottomPosition.gif) | ![](assets/readme/scroll_navigation/TopPosition.gif) |
 
 <br>
 
@@ -63,9 +63,12 @@ Widget build(BuildContext context) {
 
 ```
 
-|              NavigationPosition.left              |               NavigationPosition.right               |
-| :-----------------------------------------------: | :--------------------------------------------------: |
-| ![](assets/readme/scroll_navigation/navOnTop.gif) | ![](assets/readme/scroll_navigation/navOnBottom.gif) |
+<br>
+<br>
+
+|                NavigationPosition.left                |                NavigationPosition.right                |
+| :---------------------------------------------------: | :----------------------------------------------------: |
+| ![](assets/readme/scroll_navigation/LeftPosition.gif) | ![](assets/readme/scroll_navigation/RightPosition.gif) |
 
 <br>
 
@@ -203,37 +206,7 @@ return TitleScrollNavigation(
 
 <br><br>
 
-## Screen Details
-
-#### Screen fixes some problems the Scaffold has with the ScrollNavigation.
-
-|                  Without Widgets                   |                  With Widgets                   |
-| :------------------------------------------------: | :---------------------------------------------: |
-| ![](assets/readme/screen/screenWithoutWidgets.jpg) | ![](assets/readme/screen/screenWithWidgets.jpg) |
-
-<br>
-
-#### Without Widgets Code
-
-```dart
-return Screen();
-```
-
-<br>
-
-#### With Widgets Code
-
-```dart
-return Screen(
-    title: title("Home"), //Function in the Example
-    leftWidget: Icon(Icons.menu, color: Colors.grey),
-    rightWidget: Icon(Icons.favorite, color: Colors.grey),
-);
-```
-
-<br><br>
-
-#### Hide AppBar on scroll.
+## Screen Details (Hide AppBar on scroll)
 
 ![](assets/readme/screen/hideAppBarOnScroll.gif)
 
