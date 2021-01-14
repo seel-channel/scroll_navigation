@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:scroll_navigation/scroll_navigation.dart';
@@ -16,7 +14,77 @@ class App extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Scroll Navigation Demo',
-      home: HomePage(),
+      home: EasyVerticalNavigation(),
+    );
+  }
+}
+
+class EasyHorizontalNavigation extends StatelessWidget {
+  const EasyHorizontalNavigation({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: ScrollNavigation(
+        initialPage: 4,
+        bodyStyle: NavigationBodyStyle(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+        ),
+        barStyle: NavigationBarStyle(
+          background: Colors.white,
+          elevation: 0.0,
+        ),
+        pages: [
+          Container(color: Colors.blue[100]),
+          Container(color: Colors.green[100]),
+          Container(color: Colors.purple[100]),
+          Container(color: Colors.amber[100]),
+          Container(color: Colors.deepOrange[100])
+        ],
+        items: const [
+          ScrollNavigationItem(icon: Icon(Icons.camera)),
+          ScrollNavigationItem(icon: Icon(Icons.chat)),
+          ScrollNavigationItem(icon: Icon(Icons.favorite)),
+          ScrollNavigationItem(icon: Icon(Icons.notifications)),
+          ScrollNavigationItem(icon: Icon(Icons.home))
+        ],
+      ),
+    );
+  }
+}
+
+class EasyVerticalNavigation extends StatelessWidget {
+  const EasyVerticalNavigation({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ScrollNavigation(
+      initialPage: 4,
+      bodyStyle: NavigationBodyStyle(
+        background: Colors.white,
+        borderRadius: BorderRadius.horizontal(left: Radius.circular(20)),
+        scrollDirection: Axis.vertical,
+      ),
+      barStyle: NavigationBarStyle(
+        position: NavigationPosition.left,
+        elevation: 0.0,
+        background: Colors.white,
+      ),
+      pages: [
+        Container(color: Colors.blue[100]),
+        Container(color: Colors.green[100]),
+        Container(color: Colors.purple[100]),
+        Container(color: Colors.amber[100]),
+        Container(color: Colors.deepOrange[100])
+      ],
+      items: const [
+        ScrollNavigationItem(icon: Icon(Icons.camera)),
+        ScrollNavigationItem(icon: Icon(Icons.chat)),
+        ScrollNavigationItem(icon: Icon(Icons.favorite)),
+        ScrollNavigationItem(icon: Icon(Icons.notifications)),
+        ScrollNavigationItem(icon: Icon(Icons.home))
+      ],
     );
   }
 }
