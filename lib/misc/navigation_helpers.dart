@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 
 enum NavigationPosition { top, bottom, left, right }
 
+enum IdentifierPosition { topAndRight, bottomAndLeft }
+
 class ScrollNavigationItem {
   /// Creates an item that is used with [ScrollNavigation.items].
   /// The argument [icon] should not be null and the argument [title] if null or empty don't show it.
@@ -132,18 +134,20 @@ class NavigationBodyStyle {
 class NavigationIdentiferStyle {
   const NavigationIdentiferStyle({
     this.color = Colors.blue,
-    this.position = NavigationPosition.bottom,
-    BorderRadiusGeometry borderRadius,
-  }) : this.borderRadius = borderRadius ?? position == NavigationPosition.bottom
-            ? const BorderRadius.vertical(top: Radius.circular(10.0))
-            : const BorderRadius.vertical(bottom: Radius.circular(10.0));
+    this.position = IdentifierPosition.bottomAndLeft,
+    this.borderRadius = BorderRadius.zero,
+    this.width = 3.0,
+  });
 
   //Identifier color
   final Color color;
 
   ///Will show the identifier at the navBar bottom or at the top of the navBar.
-  final NavigationPosition position;
+  final IdentifierPosition position;
 
   ///Show a circular border radius else show a simple rectangle.
   final BorderRadiusGeometry borderRadius;
+
+  ///Identifer width
+  final double width;
 }
