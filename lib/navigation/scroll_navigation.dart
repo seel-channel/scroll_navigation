@@ -255,6 +255,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
                     children: widget.pages,
                     controller: _controller,
                     onPageChanged: _onPageChanged,
+                    scrollDirection: _bodyStyle.scrollDirection,
                     dragStartBehavior: _bodyStyle.dragStartBehavior,
                   ),
                 ),

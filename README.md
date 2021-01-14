@@ -67,9 +67,7 @@ return ScrollNavigation(
 
 ## Scroll Navigation Details
 
-(It's recommended to set showAppBar = false on the Screen Widget)
-
-|        BarPosition: NavigationPosition.top        |        BarPosition: NavigationPosition.bottom        |
+|              NavigationPosition.top               |              NavigationPosition.bottom               |
 | :-----------------------------------------------: | :--------------------------------------------------: |
 | ![](assets/readme/scroll_navigation/navOnTop.gif) | ![](assets/readme/scroll_navigation/navOnBottom.gif) |
 
@@ -85,7 +83,7 @@ Widget build(BuildContext context) {
   return ScrollNavigation(
     key: navigationKey,
     pages: [...],
-    navItems: [...],
+    items: [...],
     barStyle: NavigationBarStyle(position: NavigationPosition.top),
   );
 }
@@ -108,7 +106,7 @@ void goToPage(int index) => navigationKey.currentState.goToPage(index);
 
 <br><br>
 
-|        IdentifierPosition: NavigationPosition.top        |                    showIdentifier: False                     |
+|                  NavigationPosition.top                  |                    showIdentifier: False                     |
 | :------------------------------------------------------: | :----------------------------------------------------------: |
 | ![](assets/readme/scroll_navigation/identifierOnTop.gif) | ![](assets/readme/scroll_navigation/showIdentifierFalse.gif) |
 

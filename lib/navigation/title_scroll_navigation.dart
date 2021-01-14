@@ -210,6 +210,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
               physics: widget.bodyStyle.physics,
               children: widget.pages,
               controller: _controller,
+              scrollDirection: widget.bodyStyle.scrollDirection,
               dragStartBehavior: widget.bodyStyle.dragStartBehavior,
             ),
           ),

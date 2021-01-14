@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-enum NavigationPosition { top, bottom }
+enum NavigationPosition { top, bottom, left, right }
 
 class ScrollNavigationItem {
   /// Creates an item that is used with [ScrollNavigation.items].
@@ -103,6 +103,7 @@ class NavigationBodyStyle {
     this.borderRadius = BorderRadius.zero,
     this.physics,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.scrollDirection = Axis.horizontal,
   });
 
   ///Background color
@@ -117,8 +118,15 @@ class NavigationBodyStyle {
   ///Defaults to matching platform conventions.
   final ScrollPhysics physics;
 
-  ///[PageView] propierty
+  ///Determines the way that drag start behavior is handled.
+  ///
+  ///If set to [DragStartBehavior.start], scrolling drag behavior will begin upon the detection of a drag gesture.
+  ///
+  ///If set to [DragStartBehavior.down] it will begin when a down event is first detected.
   final DragStartBehavior dragStartBehavior;
+
+  ///The axis along which the page view scrolls. Defaults to [Axis.horizontal].
+  final Axis scrollDirection;
 }
 
 class NavigationIdentiferStyle {
