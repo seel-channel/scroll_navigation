@@ -124,12 +124,12 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   void _setTitlesWidth() {
     setState(() {
       for (int i = 0; i < _titlesProps.length; i++)
-        _titlesProps[i]["width"] = GetKey(_titlesProps[i]["key"]).width;
+        _titlesProps[i]["width"] = _titlesProps[i]["key"].width;
 
       _identifier["width"] = _getTitleWidth(widget.initialPage);
       _identifier["position"] = _paddingLeft;
 
-      _halfWidth = GetMedia(context).width / 2;
+      _halfWidth = context.media.width / 2;
       _maxScroll = _titlesController.position.maxScrollExtent;
     });
   }
@@ -217,7 +217,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
         ),
       ]),
       backgroundColor: widget.bodyStyle.background,
-      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: false,
     );
   }
 

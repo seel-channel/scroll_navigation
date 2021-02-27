@@ -1,5 +1,4 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -155,7 +154,7 @@ class _ScreenState extends State<Screen> {
       appBar: widget.showAppBar ? appBar(context) : null,
       body: widget.body,
       floatingActionButton: widget.floatingButton,
-      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: false,
     );
   }
 

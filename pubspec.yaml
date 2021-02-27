@@ -1,6 +1,6 @@
 name: scroll_navigation
 description: It's a powerful navigation by gestures and taps. You can scroll from left to right or tap on the navigation icons.
-version: 1.2.1
+version: 1.2.1+1
 homepage: https://github.com/seel-channel/scroll_navigation
 
 environment:
@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  helpers: ^1.0.3
+  helpers: ^1.0.5
 
 dev_dependencies:
   flutter_test:

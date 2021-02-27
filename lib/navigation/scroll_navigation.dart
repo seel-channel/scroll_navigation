@@ -136,8 +136,8 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     Misc.onLayoutRendered(() => setState(() => _navSize =
         _barStyle.position == NavigationPosition.left ||
                 _barStyle.position == NavigationPosition.right
-            ? GetKey(_navKey).width
-            : GetKey(_navKey).height));
+            ? _navKey.width
+            : _navKey.height));
     super.initState();
   }
 
@@ -245,8 +245,8 @@ class ScrollNavigationState extends State<ScrollNavigation> {
         builder: (_, Orientation orientation) {
           if (_orientation == null || _orientation != orientation) {
             final double size = (_verticalPosition
-                    ? GetMedia(context).height
-                    : GetMedia(context).width) *
+                    ? context.media.height
+                    : context.media.width) *
                 (1 / widget.items.length);
             _orientation = orientation;
             _identifierLength = size;
@@ -287,7 +287,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
                 ? _buildNavigation(1 - _barStyle.elevation)
                 : null,
             floatingActionButton: _pagesActionButtons[_currentIndex],
-            resizeToAvoidBottomPadding: false,
+            resizeToAvoidBottomInset: false,
             backgroundColor: _bodyStyle.background,
           );
         },

@@ -1,3 +1,7 @@
+## [1.2.1+1]
+
+- Helpers dependency error fixed
+
 ## [1.2.1]
 
 - NavigationPosition.left and NavigationPosition.right added
