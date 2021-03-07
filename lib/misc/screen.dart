@@ -5,7 +5,7 @@ import 'package:flutter/rendering.dart';
 class ScreenReturnButton extends StatelessWidget {
   ///It's a simple icon that serves as a return button,
   ///It's function is to close the context.
-  const ScreenReturnButton({Key key, this.size = 24, this.color = Colors.grey})
+  const ScreenReturnButton({Key? key, this.size = 24, this.color = Colors.grey})
       : super(key: key);
 
   ///The size of the icon in logical pixels.
@@ -28,7 +28,7 @@ class Screen extends StatefulWidget {
   ///Scaffold core, but fixes some problems the Scaffold has with the
   ///ScrollNavigation.
   Screen({
-    Key key,
+    Key? key,
     this.body,
     this.floatingButton,
     this.leftWidget,
@@ -44,22 +44,22 @@ class Screen extends StatefulWidget {
   }) : super(key: key);
 
   ///It is the body of the Scaffold, you can place any Widget.
-  final Widget body;
+  final Widget? body;
 
   ///It is recommended to use the [pages ActionButtons] property of the Scroll Navigation.
   ///Otherwise, it works like the [floatingActionButton] of the Scaffold
-  final Widget floatingButton;
+  final Widget? floatingButton;
 
   ///Appears to the left of the Appbar in the same position as the [returnButton].
   ///If the returnButton is active, this Widget will be ignored.
-  final Widget leftWidget;
+  final Widget? leftWidget;
 
   ///It is the central widget of the Appbar, it is recommended to use for titles.
-  final Widget title;
+  final Widget? title;
 
   ///Appears to the right of the Appbar. You can put a [Row],
   ///but the [MainAxisSize.min] property must be activated
-  final Widget rightWidget;
+  final Widget? rightWidget;
 
   ///Center the Title Widgets.
   final bool centerTitle;
@@ -79,7 +79,7 @@ class Screen extends StatefulWidget {
 
   ///This parameter is used to hide the appbar when scrolling vertically
   ///a listview or some other scrolling widget that accepts a ScrollController.
-  final ScrollController controllerToHideAppBar;
+  final ScrollController? controllerToHideAppBar;
 
   ///It's the number of pixels that scrolling will need to hide or
   ///show the appbar. The smaller the number of pixels, the faster
@@ -92,9 +92,9 @@ class Screen extends StatefulWidget {
 }
 
 class _ScreenState extends State<Screen> {
-  final ValueNotifier _height = ValueNotifier<double>(0.0);
-  ScrollController _controller;
-  double _heightRef = 0, _offsetRef = 0;
+  final ValueNotifier _height = ValueNotifier<double?>(0.0);
+  ScrollController? _controller;
+  double? _heightRef = 0, _offsetRef = 0;
   bool _subiendo = false;
 
   @override
@@ -103,7 +103,7 @@ class _ScreenState extends State<Screen> {
     _heightRef = _height.value;
     if (widget.controllerToHideAppBar != null) {
       _controller = widget.controllerToHideAppBar;
-      _controller.addListener(changeAppBarHeight);
+      _controller!.addListener(changeAppBarHeight);
     }
     super.initState();
   }
@@ -111,13 +111,13 @@ class _ScreenState extends State<Screen> {
   @override
   void dispose() {
     if (widget.controllerToHideAppBar != null)
-      _controller.removeListener(changeAppBarHeight);
+      _controller!.removeListener(changeAppBarHeight);
     super.dispose();
   }
 
   void changeAppBarHeight() {
-    ScrollDirection direction = _controller.position.userScrollDirection;
-    AxisDirection axisDirection = _controller.position.axisDirection;
+    ScrollDirection direction = _controller!.position.userScrollDirection;
+    AxisDirection axisDirection = _controller!.position.axisDirection;
 
     if (axisDirection == AxisDirection.up ||
         axisDirection == AxisDirection.down) {
@@ -138,12 +138,12 @@ class _ScreenState extends State<Screen> {
     setState(() {
       _subiendo = !_subiendo;
       _heightRef = _height.value;
-      _offsetRef = _controller.offset;
+      _offsetRef = _controller!.offset;
     });
   }
 
   void setHeight(double toValue) {
-    double lerp = (_offsetRef - _controller.offset) / widget.offsetToHideAppBar;
+    double lerp = (_offsetRef! - _controller!.offset) / widget.offsetToHideAppBar;
     lerp = lerp.abs();
     if (lerp <= 1.0) _height.value = lerpDouble(_heightRef, toValue, lerp);
   }
@@ -151,7 +151,7 @@ class _ScreenState extends State<Screen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.showAppBar ? appBar(context) : null,
+      appBar: widget.showAppBar ? appBar(context) as PreferredSizeWidget? : null,
       body: widget.body,
       floatingActionButton: widget.floatingButton,
       resizeToAvoidBottomInset: false,
@@ -185,7 +185,7 @@ class _ScreenState extends State<Screen> {
                             padding: EdgeInsets.only(right: paddingConst),
                             child: widget.leftWidget),
                   ),
-                  Expanded(flex: 70, child: widget.title),
+                  Expanded(flex: 70, child: widget.title!),
                   Align(
                     alignment: AlignmentDirectional.centerEnd,
                     child: widget.rightWidget == null
@@ -214,7 +214,7 @@ class _ScreenState extends State<Screen> {
   }
 
   PreferredSize _preferredSafeArea({
-    Widget child,
+    required Widget child,
     Color backgroundColor = Colors.white,
     double height = 84,
     double elevation = 3,

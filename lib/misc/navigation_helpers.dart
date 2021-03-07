@@ -25,16 +25,16 @@ class ScrollNavigationItem {
   ///
   ///This property must not be null.
   ///See [Icon], [ImageIcon].
-  final Widget icon;
+  final Widget? icon;
 
   ///The [icon] will change to the [activeIcon] when the user is on that page.
-  final Widget activeIcon;
+  final Widget? activeIcon;
 
   ///If the [title] is null or empty won't show it.
-  final String title;
+  final String? title;
 
   ///The style for title, the [color] property will ignored.
-  final TextStyle titleStyle;
+  final TextStyle? titleStyle;
 }
 
 class NavigationBarStyle {
@@ -78,7 +78,7 @@ class TitleNavigationBarStyle {
   });
 
   /// It is Titles style
-  final TextStyle style;
+  final TextStyle? style;
 
   /// It is the color that the active title will show.
   final Color activeColor;
@@ -109,7 +109,7 @@ class NavigationBodyStyle {
   });
 
   ///Background color
-  final Color background;
+  final Color? background;
 
   ///ClipRRect border radius
   final BorderRadiusGeometry borderRadius;
@@ -118,7 +118,7 @@ class NavigationBodyStyle {
   ///For example, determines how the page view continues to animate after the user stops dragging the page view.
   ///The physics are modified to snap to page boundaries using [PageScrollPhysics] prior to being used.
   ///Defaults to matching platform conventions.
-  final ScrollPhysics physics;
+  final ScrollPhysics? physics;
 
   ///Determines the way that drag start behavior is handled.
   ///

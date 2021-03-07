@@ -1,3 +1,7 @@
+## [1.3.0]
+
+- Null Safety Migration
+
 ## [1.2.1+1]
 
 - Helpers dependency error fixed

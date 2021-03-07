@@ -11,19 +11,18 @@ class ScrollNavigation extends StatefulWidget {
   ///
   /// Pages and items must have the same number of elements.
   ScrollNavigation({
-    Key key,
-    this.pages,
-    this.items,
+    Key? key,
+    required this.pages,
+    required this.items,
     this.pagesActionButtons,
     this.initialPage = 0,
     this.showIdentifier = true,
     this.physics = true,
     this.maxWillPopLocations = 5,
-    NavigationBarStyle barStyle,
-    NavigationBodyStyle bodyStyle,
-    NavigationIdentiferStyle identiferStyle,
-  })  : assert(items != null && pages != null),
-        assert(items.length == pages.length),
+    NavigationBarStyle? barStyle,
+    NavigationBodyStyle? bodyStyle,
+    NavigationIdentiferStyle? identiferStyle,
+  })  : assert(items.length == pages.length),
         this.barStyle = barStyle ?? NavigationBarStyle(),
         this.bodyStyle = bodyStyle ?? NavigationBodyStyle(),
         this.identiferStyle = identiferStyle ?? NavigationIdentiferStyle(),
@@ -38,7 +37,7 @@ class ScrollNavigation extends StatefulWidget {
 
   ///They are the floating action buttons or Widgets that the pages will have.
   ///To separate pages you can put: Widget, null, Widget
-  final List<Widget> pagesActionButtons;
+  final List<Widget>? pagesActionButtons;
 
   ///They are the list of elements that the menu will have.
   ///They must match the total number of pages.
@@ -72,23 +71,23 @@ class ScrollNavigationState extends State<ScrollNavigation> {
   final ValueNotifier<double> _identifierPosition = ValueNotifier<double>(0.0);
   final GlobalKey _navKey = GlobalKey();
 
-  int _maxItemsCache;
+  late int _maxItemsCache;
   int _currentIndex = 0;
   bool _itemTapped = false;
   double _navSize = 0.0;
   double _identifierLength = 0.0;
 
   List<int> _popUpCache = [];
-  List<Widget> _navIcons = [];
+  List<Widget?> _navIcons = [];
   List<Widget> _navTexts = [];
-  List<Widget> _pagesActionButtons = [];
+  List<Widget?> _pagesActionButtons = [];
 
   bool _verticalPosition = false;
-  Orientation _orientation;
-  PageController _controller;
-  NavigationBarStyle _barStyle;
-  NavigationBodyStyle _bodyStyle;
-  NavigationIdentiferStyle _identifierStyle;
+  Orientation? _orientation;
+  PageController? _controller;
+  late NavigationBarStyle _barStyle;
+  late NavigationBodyStyle _bodyStyle;
+  late NavigationIdentiferStyle _identifierStyle;
 
   ///Go to a page :)
   void goToPage(int index) => _onBottomItemTapped(index);
@@ -98,13 +97,13 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     _barStyle = widget.barStyle;
     _bodyStyle = widget.bodyStyle;
     _currentIndex = widget.initialPage;
-    _maxItemsCache = widget.maxWillPopLocations ?? 5;
+    _maxItemsCache = widget.maxWillPopLocations;
     _identifierStyle = widget.identiferStyle;
     _verticalPosition = _barStyle.position == NavigationPosition.left ||
         _barStyle.position == NavigationPosition.right;
 
     _controller = PageController(initialPage: widget.initialPage);
-    _controller.addListener(_scrollListener);
+    _controller!.addListener(_scrollListener);
     _popUpCache.add(widget.initialPage);
 
     //FILL FLOATING ACTION BUTTONS ON _pagesActionButtons
@@ -112,8 +111,8 @@ class ScrollNavigationState extends State<ScrollNavigation> {
       _pagesActionButtons = List.filled(widget.pages.length, null);
     else {
       for (var i = 0; i < widget.pages.length + 1; i++) {
-        i < widget.pagesActionButtons.length
-            ? _pagesActionButtons.add(widget.pagesActionButtons[i])
+        i < widget.pagesActionButtons!.length
+            ? _pagesActionButtons.add(widget.pagesActionButtons![i])
             : _pagesActionButtons.add(null);
       }
     }
@@ -121,9 +120,9 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     for (int i = 0; i < widget.items.length; i++) {
       final item = widget.items[i];
       _navIcons.add(item.icon);
-      _navTexts.add(item.title != null && item.title.isNotEmpty
+      _navTexts.add(item.title != null && item.title!.isNotEmpty
           ? Text(
-              item.title,
+              item.title!,
               overflow: TextOverflow.ellipsis,
               style: item.titleStyle,
             )
@@ -143,12 +142,12 @@ class ScrollNavigationState extends State<ScrollNavigation> {
 
   @override
   void dispose() {
-    _controller.removeListener(_scrollListener);
+    _controller!.removeListener(_scrollListener);
     super.dispose();
   }
 
   void _scrollListener() {
-    final double page = _controller.page;
+    final double page = _controller!.page!;
     final int currentPage = page.floor();
 
     if (widget.physics) {
@@ -180,7 +179,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
         _itemTapped = true;
         _popUpCache.add(index);
       });
-      await _controller.animateToPage(
+      await _controller!.animateToPage(
         index,
         curve: Curves.linearToEaseOut,
         duration: Duration(milliseconds: 500),
@@ -220,14 +219,14 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     _navIcons[index] = IconTheme.merge(
       data: IconThemeData(color: color),
       child: item.activeIcon == null
-          ? item.icon
+          ? item.icon!
           : lerp > 0.5
-              ? item.activeIcon
-              : item.icon,
+              ? item.activeIcon!
+              : item.icon!,
     );
-    if (item.title != null && item.title.isNotEmpty)
+    if (item.title != null && item.title!.isNotEmpty)
       _navTexts[index] = Text(
-        item.title,
+        item.title!,
         overflow: TextOverflow.ellipsis,
         style: TextStyle(color: color).merge(item.titleStyle),
       );
@@ -267,7 +266,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
                     _buildNavigation(_barStyle.elevation),
                   Expanded(
                     child: ClipRRect(
-                      borderRadius: _bodyStyle.borderRadius,
+                      borderRadius: _bodyStyle.borderRadius as BorderRadius?,
                       child: PageView(
                         physics: _bodyStyle.physics,
                         children: widget.pages,
@@ -316,7 +315,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
 
         ///ICONS
         child: AnimatedBuilder(
-          animation: _controller,
+          animation: _controller!,
           builder: (_, __) => _verticalPosition
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -377,7 +376,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
               alignment: _verticalPosition ? Alignment.center : null,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: [_navIcons[i], _navTexts[i]],
+                children: [_navIcons[i]!, _navTexts[i]],
               ),
             ),
           ),

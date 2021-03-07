@@ -10,16 +10,15 @@ class TitleScrollNavigation extends StatefulWidget {
   ///Also, the identifier will be adjusted to the text width
   ///and will have a color interpolation between titles.
   TitleScrollNavigation({
-    Key key,
-    this.titles,
-    this.pages,
+    Key? key,
+    required this.titles,
+    required this.pages,
     this.initialPage = 0,
     this.showIdentifier = true,
-    NavigationBodyStyle bodyStyle,
-    TitleNavigationBarStyle barStyle,
-    NavigationIdentiferStyle identiferStyle,
-  })  : assert(titles != null && pages != null),
-        assert(titles.length == pages.length),
+    NavigationBodyStyle? bodyStyle,
+    TitleNavigationBarStyle? barStyle,
+    NavigationIdentiferStyle? identiferStyle,
+  })  : assert(titles.length == pages.length),
         this.barStyle = barStyle ?? TitleNavigationBarStyle(),
         this.bodyStyle = bodyStyle ?? NavigationBodyStyle(),
         this.identiferStyle = identiferStyle ?? NavigationIdentiferStyle(),
@@ -53,7 +52,7 @@ class TitleScrollNavigation extends StatefulWidget {
 
 class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   final ScrollController _titlesController = ScrollController();
-  PageController _controller;
+  PageController? _controller;
 
   int _currentPage = 0;
   bool _itemTapped = false;
@@ -63,7 +62,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   double _initialPosition = 0.0;
 
   List<Widget> _navTitles = [];
-  Map<String, double> _identifier = {};
+  Map<String, double?> _identifier = {};
   List<Map<String, dynamic>> _titlesProps = [];
 
   ///Go to a page :)
@@ -74,7 +73,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
     _currentPage = widget.initialPage;
     _paddingLeft = widget.barStyle.padding.left;
     _controller = PageController(initialPage: widget.initialPage);
-    _controller.addListener(_scrollListener);
+    _controller!.addListener(_scrollListener);
 
     for (int i = 0; i < widget.titles.length; i++) {
       _titlesProps.add({"key": GlobalKey(), "width": 0.0});
@@ -88,13 +87,13 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
 
   @override
   void dispose() {
-    _controller.removeListener(_scrollListener);
-    _controller.dispose();
+    _controller!.removeListener(_scrollListener);
+    _controller!.dispose();
     super.dispose();
   }
 
   void _scrollListener() {
-    final double page = _controller.page;
+    final double page = _controller!.page!;
     final int current = page.floor();
     final double decimal = page - current;
 
@@ -107,7 +106,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
     }
 
     double jumpTo =
-        _identifier["position"] - _halfWidth + (_identifier["width"] / 2);
+        _identifier["position"]! - _halfWidth + (_identifier["width"]! / 2);
 
     if (jumpTo > _maxScroll)
       jumpTo = _maxScroll;
@@ -136,7 +135,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
 
   void _titleTapped(int index) async {
     setState(() => _itemTapped = true);
-    await _controller.animateToPage(
+    await _controller!.animateToPage(
       index,
       curve: Curves.ease,
       duration: Duration(milliseconds: 400),
@@ -144,24 +143,24 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
     setState(() {
       _itemTapped = false;
       _clearTitleLerp();
-      _setTitleLerp(_controller.page.round(), 1.0);
+      _setTitleLerp(_controller!.page!.round(), 1.0);
     });
   }
 
   //----------//
   //IDENTIFIER//
   //----------//
-  double _getTitleWidth(int index) => _titlesProps[index]["width"];
+  double? _getTitleWidth(int index) => _titlesProps[index]["width"];
 
   double _getIdentifierWidth(int page, double decimal) {
-    double floorWidth({int next = 0}) => _getTitleWidth(page + next);
-    final double width = floorWidth();
-    final double nextWidth = floorWidth(next: 1);
+    double? floorWidth({int next = 0}) => _getTitleWidth(page + next);
+    final double width = floorWidth()!;
+    final double nextWidth = floorWidth(next: 1)!;
     return width + ((nextWidth - width) * decimal);
   }
 
   double _getIdentifierPosition(int page, double decimal) {
-    double widthPadding(i) => _getTitleWidth(i) + widget.barStyle.spaceBetween;
+    double widthPadding(i) => _getTitleWidth(i)! + widget.barStyle.spaceBetween;
     double position = 0;
 
     if (page != _currentPage) {
@@ -205,7 +204,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
         ),
         Expanded(
           child: ClipRRect(
-            borderRadius: widget.bodyStyle.borderRadius,
+            borderRadius: widget.bodyStyle.borderRadius as BorderRadius?,
             child: PageView(
               physics: widget.bodyStyle.physics,
               children: widget.pages,
@@ -223,7 +222,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
 
   Widget _buildScrollTitles() {
     return AnimatedBuilder(
-      animation: _controller,
+      animation: _controller!,
       builder: (_, __) => SingleChildScrollView(
         controller: _titlesController,
         scrollDirection: Axis.horizontal,
