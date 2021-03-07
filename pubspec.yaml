@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  helpers: ^1.0.5
+  helpers: ^1.1.0
 
 dev_dependencies:
   flutter_test:

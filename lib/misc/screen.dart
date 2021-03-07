@@ -92,14 +92,15 @@ class Screen extends StatefulWidget {
 }
 
 class _ScreenState extends State<Screen> {
+  final ValueNotifier _height = ValueNotifier<double>(0.0);
+  ScrollController _controller;
+  double _heightRef = 0, _offsetRef = 0;
   bool _subiendo = false;
-  double _height = 0, _heightRef = 0, _offsetRef = 0;
-  ScrollController _controller = ScrollController();
 
   @override
   void initState() {
-    _height = widget.height;
-    _heightRef = _height;
+    _height.value = widget.height;
+    _heightRef = _height.value;
     if (widget.controllerToHideAppBar != null) {
       _controller = widget.controllerToHideAppBar;
       _controller.addListener(changeAppBarHeight);
@@ -136,7 +137,7 @@ class _ScreenState extends State<Screen> {
   void setRefs() {
     setState(() {
       _subiendo = !_subiendo;
-      _heightRef = _height;
+      _heightRef = _height.value;
       _offsetRef = _controller.offset;
     });
   }
@@ -144,8 +145,7 @@ class _ScreenState extends State<Screen> {
   void setHeight(double toValue) {
     double lerp = (_offsetRef - _controller.offset) / widget.offsetToHideAppBar;
     lerp = lerp.abs();
-    if (lerp <= 1.0)
-      setState(() => _height = lerpDouble(_heightRef, toValue, lerp));
+    if (lerp <= 1.0) _height.value = lerpDouble(_heightRef, toValue, lerp);
   }
 
   @override
@@ -160,16 +160,8 @@ class _ScreenState extends State<Screen> {
 
   Widget appBar(BuildContext context) {
     double paddingConst = MediaQuery.of(context).size.width * 0.05;
-    return _preferredSafeArea(
-      elevation: widget.elevation,
-      backgroundColor: widget.backgroundColor,
-      height: _height,
-      child: Opacity(
-        opacity: Interval(
-          0.2,
-          1.0,
-          curve: Curves.ease,
-        ).transform(_height / widget.height),
+    return AnimatedBuilder(
+        animation: _height,
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: paddingConst),
           child: widget.centerTitle
@@ -204,8 +196,21 @@ class _ScreenState extends State<Screen> {
                   ),
                 ]),
         ),
-      ),
-    );
+        builder: (_, child) {
+          return _preferredSafeArea(
+            elevation: widget.elevation,
+            backgroundColor: widget.backgroundColor,
+            height: _height.value,
+            child: Opacity(
+              opacity: Interval(
+                0.2,
+                1.0,
+                curve: Curves.ease,
+              ).transform(_height.value / widget.height),
+              child: child,
+            ),
+          );
+        });
   }
 
   PreferredSize _preferredSafeArea({
