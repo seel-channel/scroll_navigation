@@ -14,7 +14,7 @@ class App extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Scroll Navigation Demo',
-      home: EasyVerticalNavigation(),
+      home: AdvancedNavigation(),
     );
   }
 }
@@ -97,20 +97,27 @@ class AdvancedNavigation extends StatefulWidget {
 }
 
 class _AdvancedNavigationState extends State<AdvancedNavigation> {
-  final ScrollController controller = ScrollController();
   final navigationKey = GlobalKey<ScrollNavigationState>();
 
   @override
   Widget build(BuildContext context) {
     return ScrollNavigation(
       key: navigationKey,
-      initialPage: 4,
       pages: [
-        Screen(title: title("Camera")),
-        Screen(title: title("Messages"), backgroundColor: Colors.yellow[50]),
-        Screen(title: title("Favor"), body: Container(color: Colors.cyan[50])),
-        Screen(title: title("Activity"), backgroundColor: Colors.yellow[50]),
-        Screen(title: title("Home"))
+        Screen(
+          appBar: AppBarTitle(title: "Camera"),
+        ),
+        Screen(
+          appBar: AppBarTitle(title: "Messages"),
+        ),
+        Screen(
+          appBar: AppBarTitle(title: "Favor"),
+          body: Container(color: Colors.cyan[50]),
+        ),
+        Screen(
+          appBar: AppBarTitle(title: "Activity"),
+        ),
+        Screen(appBar: AppBarTitle(title: "Home"))
       ],
       items: const [
         ScrollNavigationItem(icon: Icon(Icons.camera)),
@@ -127,7 +134,9 @@ class _AdvancedNavigationState extends State<AdvancedNavigation> {
           child: Icon(Icons.receipt),
           backgroundColor: Colors.red,
           onPressed: () => Navigator.push(
-              context, MaterialPageRoute(builder: (context) => newHome())),
+            context,
+            MaterialPageRoute(builder: (context) => NewHome()),
+          ),
         ),
         null,
         FloatingActionButton(
@@ -142,19 +151,22 @@ class _AdvancedNavigationState extends State<AdvancedNavigation> {
       ],
     );
   }
+}
 
-  Widget newHome() {
+class NewHome extends StatelessWidget {
+  const NewHome({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final ScrollController controller = ScrollController();
+
     return Screen(
-      height: 56.0,
-      elevation: 0,
-      centerTitle: false,
-      title: title("Title Scroll"),
+      appBar: AppBarTitle(title: "Title Scroll"),
       controllerToHideAppBar: controller,
-      leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
       body: TitleScrollNavigation(
         barStyle: TitleNavigationBarStyle(
           style: TextStyle(fontWeight: FontWeight.bold),
-          padding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 10.0),
+          padding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0),
           spaceBetween: 40,
         ),
         titles: [
@@ -165,21 +177,19 @@ class _AdvancedNavigationState extends State<AdvancedNavigation> {
           "Payment Methods",
         ],
         pages: [
-          Container(
-            color: Colors.white,
-            child: ListView.builder(
-              itemCount: 15,
-              controller: controller,
-              itemBuilder: (context, key) {
-                return Padding(
-                  padding: EdgeInsets.symmetric(vertical: 5),
-                  child: Container(
-                    height: 50,
-                    color: Colors.blue[50],
-                  ),
-                );
-              },
-            ),
+          ListView.builder(
+            itemCount: 15,
+            controller: controller,
+            padding: EdgeInsets.zero,
+            itemBuilder: (_, __) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: 10),
+                child: Container(
+                  height: 50,
+                  color: Colors.blue[50],
+                ),
+              );
+            },
           ),
           Container(color: Colors.red[50]),
           Container(color: Colors.green[50]),
@@ -189,16 +199,44 @@ class _AdvancedNavigationState extends State<AdvancedNavigation> {
       ),
     );
   }
+}
 
-  Widget title(String title) {
-    return Text(
-      title.toUpperCase(),
-      style: TextStyle(
-        fontSize: 22,
-        color: Colors.grey,
-        fontWeight: FontWeight.bold,
-        wordSpacing: 1.5,
-        letterSpacing: 0.5,
+class AppBarTitle extends StatelessWidget {
+  const AppBarTitle({
+    Key key,
+    @required this.title,
+  }) : super(key: key);
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: -3,
+            blurRadius: 2,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Text(
+            title.toUpperCase(),
+            style: TextStyle(
+              fontSize: 22,
+              color: Colors.grey,
+              fontWeight: FontWeight.bold,
+              wordSpacing: 1.5,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ]),
       ),
     );
   }
