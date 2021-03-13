@@ -98,6 +98,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
 
   @override
   void dispose() {
+    _titlesController.dispose();
     _controller.removeListener(_scrollListener);
     _controller.dispose();
     super.dispose();
