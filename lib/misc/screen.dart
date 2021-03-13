@@ -62,8 +62,8 @@ class Screen extends StatefulWidget {
 
 class _ScreenState extends State<Screen> {
   final ValueNotifier<double> _height = ValueNotifier<double>(0.0);
-  late double _appBarHeight = 1.0;
   final GlobalKey _appBarKey = GlobalKey();
+  late double _appBarHeight = 0.0;
 
   ScrollController? _controller;
   double? _heightRef = 0, _offsetRef = 0;
@@ -89,8 +89,10 @@ class _ScreenState extends State<Screen> {
 
   @override
   void dispose() {
-    if (widget.controllerToHideAppBar != null)
+    if (widget.controllerToHideAppBar != null) {
       _controller!.removeListener(_controllerListener);
+      _controller!.dispose();
+    }
     _height.dispose();
     super.dispose();
   }
@@ -115,17 +117,14 @@ class _ScreenState extends State<Screen> {
   }
 
   void setRefs() {
-    setState(() {
-      _upping = !_upping;
-      _heightRef = _height.value;
-      _offsetRef = _controller!.offset;
-    });
+    _upping = !_upping;
+    _heightRef = _height.value;
+    _offsetRef = _controller!.offset;
   }
 
   void _updateHeight(double toValue) {
-    double lerp =
-        (_offsetRef! - _controller!.offset) / widget.offsetToHideAppBar;
-    lerp = lerp.abs();
+    final double lerp =
+        ((_offsetRef! - _controller!.offset) / widget.offsetToHideAppBar).abs();
     if (lerp <= 1.0)
       _height.value = lerpDouble(_heightRef, toValue, lerp) ?? 0.0;
   }
@@ -139,14 +138,10 @@ class _ScreenState extends State<Screen> {
                 ValueListenableBuilder(
                   valueListenable: _height,
                   builder: (_, double value, __) {
-                    return ClipRRect(
-                      child: Transform.translate(
-                        offset: Offset(0.0, (_appBarHeight - value) * -1),
-                        child: Container(
-                          key: _appBarKey,
-                          child: widget.appBar ?? SizedBox(),
-                        ),
-                      ),
+                    return Container(
+                      key: _appBarKey,
+                      child: widget.appBar ?? SizedBox(),
+                      height: _appBarHeight != 0.0 ? value : null,
                     );
                   },
                 ),
