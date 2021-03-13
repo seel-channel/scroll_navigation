@@ -3,27 +3,6 @@ import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-class ScreenReturnButton extends StatelessWidget {
-  ///It's a simple icon that serves as a return button,
-  ///It's function is to close the context.
-  const ScreenReturnButton({Key? key, this.size = 24, this.color = Colors.grey})
-      : super(key: key);
-
-  ///The size of the icon in logical pixels.
-  final double size;
-
-  ///The color to use when drawing the icon.
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: context.goBack,
-      child: Icon(Icons.arrow_back, color: color, size: size),
-    );
-  }
-}
-
 class Screen extends StatefulWidget {
   // It is a Widget very similar to a Scaffold, in a way, it uses the
   ///Scaffold core, but fixes some problems the Scaffold has with the
@@ -66,7 +45,7 @@ class _ScreenState extends State<Screen> {
   late double _appBarHeight = 0.0;
 
   ScrollController? _controller;
-  double? _heightRef = 0, _offsetRef = 0;
+  double _heightRef = 0, _offsetRef = 0;
   bool _upping = false;
 
   @override
@@ -78,9 +57,9 @@ class _ScreenState extends State<Screen> {
       Misc.onLayoutRendered(
         () => setState(() {
           final height = _appBarKey.height;
-          print(height);
           _height.value = height;
           _appBarHeight = height;
+          _heightRef = height;
         }),
       );
     }
@@ -98,20 +77,20 @@ class _ScreenState extends State<Screen> {
   }
 
   void _controllerListener() {
-    ScrollDirection direction = _controller!.position.userScrollDirection;
-    AxisDirection axisDirection = _controller!.position.axisDirection;
+    final ScrollDirection direction = _controller!.position.userScrollDirection;
+    final AxisDirection axisDirection = _controller!.position.axisDirection;
 
     if (axisDirection == AxisDirection.up ||
         axisDirection == AxisDirection.down) {
-      //Subiendo
+      //UPPING
       if (direction == ScrollDirection.forward) {
         if (!_upping) setRefs();
         _updateHeight(_appBarHeight);
       }
-      //Bajando
+      //DOWNING
       if (direction == ScrollDirection.reverse) {
         if (_upping) setRefs();
-        _updateHeight(0);
+        _updateHeight(0.0);
       }
     }
   }
@@ -124,30 +103,46 @@ class _ScreenState extends State<Screen> {
 
   void _updateHeight(double toValue) {
     final double lerp =
-        ((_offsetRef! - _controller!.offset) / widget.offsetToHideAppBar).abs();
-    if (lerp <= 1.0)
-      _height.value = lerpDouble(_heightRef, toValue, lerp) ?? 0.0;
+        ((_offsetRef - _controller!.offset) / widget.offsetToHideAppBar).abs();
+    _height.value =
+        lerpDouble(_heightRef, toValue, lerp <= 1.0 ? lerp : 1.0) ?? 0.0;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(children: [
+      body: Stack(children: [
+        Column(children: [
+          if (widget.controllerToHideAppBar != null)
+            ValueListenableBuilder(
+              valueListenable: _height,
+              builder: (_, double value, __) => SizedBox(height: value),
+            ),
+          Expanded(child: widget.body ?? Container()),
+        ]),
         widget.controllerToHideAppBar != null
             ? Column(mainAxisSize: MainAxisSize.min, children: [
-                ValueListenableBuilder(
-                  valueListenable: _height,
-                  builder: (_, double value, __) {
-                    return Container(
+                ClipRRect(
+                  child: ValueListenableBuilder(
+                    valueListenable: _height,
+                    child: Container(
                       key: _appBarKey,
                       child: widget.appBar ?? SizedBox(),
-                      height: _appBarHeight != 0.0 ? value : null,
-                    );
-                  },
+                    ),
+                    builder: (_, double value, child) {
+                      final offset = (_appBarHeight - value) * -1;
+                      return Transform.translate(
+                        offset: Offset(
+                          0.0,
+                          value == 0.0 ? offset - 5 : offset,
+                        ),
+                        child: child,
+                      );
+                    },
+                  ),
                 ),
               ])
             : widget.appBar ?? SizedBox(),
-        Expanded(child: widget.body ?? Container()),
       ]),
       floatingActionButton: widget.floatingButton,
       resizeToAvoidBottomInset: false,
