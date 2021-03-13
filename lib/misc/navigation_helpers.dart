@@ -112,7 +112,7 @@ class NavigationBodyStyle {
   final Color? background;
 
   ///ClipRRect border radius
-  final BorderRadiusGeometry borderRadius;
+  final BorderRadius borderRadius;
 
   ///How the page view should respond to user input.
   ///For example, determines how the page view continues to animate after the user stops dragging the page view.
