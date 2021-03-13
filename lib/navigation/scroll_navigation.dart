@@ -84,7 +84,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
 
   bool _verticalPosition = false;
   Orientation? _orientation;
-  PageController? _controller;
+  late PageController _controller;
   late NavigationBarStyle _barStyle;
   late NavigationBodyStyle _bodyStyle;
   late NavigationIdentiferStyle _identifierStyle;
@@ -103,7 +103,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
         _barStyle.position == NavigationPosition.right;
 
     _controller = PageController(initialPage: widget.initialPage);
-    _controller!.addListener(_scrollListener);
+    _controller.addListener(_scrollListener);
     _popUpCache.add(widget.initialPage);
 
     //FILL FLOATING ACTION BUTTONS ON _pagesActionButtons
@@ -142,12 +142,14 @@ class ScrollNavigationState extends State<ScrollNavigation> {
 
   @override
   void dispose() {
-    _controller!.removeListener(_scrollListener);
+    _identifierPosition.dispose();
+    _controller.removeListener(_scrollListener);
+    _controller.dispose();
     super.dispose();
   }
 
   void _scrollListener() {
-    final double page = _controller!.page!;
+    final double page = _controller.page!;
     final int currentPage = page.floor();
 
     if (widget.physics) {
@@ -179,7 +181,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
         _itemTapped = true;
         _popUpCache.add(index);
       });
-      await _controller!.animateToPage(
+      await _controller.animateToPage(
         index,
         curve: Curves.linearToEaseOut,
         duration: Duration(milliseconds: 500),
@@ -315,7 +317,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
 
         ///ICONS
         child: AnimatedBuilder(
-          animation: _controller!,
+          animation: _controller,
           builder: (_, __) => _verticalPosition
               ? Column(
                   mainAxisAlignment: MainAxisAlignment.center,
