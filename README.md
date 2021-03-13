@@ -218,16 +218,13 @@ return TitleScrollNavigation(
 ScrollController controller = ScrollController();
 
 return Screen(
-    height: 56.0,
-    elevation: 0.0,
-    centerTitle: false,
-    title: title("Title Scroll"),
-    leftWidget: ScreenReturnButton(), //IMPORTANT TO RETURN!
+    appBar: AppBarTitle(title: "Title Scroll", showBack: true), //WIDGET IN THE EXAMPLE
     controllerToHideAppBar: controller,
     body: ListView.builder(
       itemCount: 15,
+      padding: EdgeInsets.zero,
       controller: controller,
-      itemBuilder: (context, key) {
+      itemBuilder: (_, __) {
         return Padding(
           padding: EdgeInsets.symmetric(vertical: 5),
           child: Container(
