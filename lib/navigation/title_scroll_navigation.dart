@@ -197,8 +197,9 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(children: [
+    return Container(
+      color: widget.bodyStyle.background,
+      child: Column(children: [
         Container(
           decoration: BoxDecoration(
             color: widget.barStyle.background,
@@ -211,7 +212,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
               ),
             ],
           ),
-          child: SafeArea(child: _buildScrollTitles()),
+          child: _buildScrollTitles(),
         ),
         Expanded(
           child: ClipRRect(
@@ -226,8 +227,6 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
           ),
         ),
       ]),
-      backgroundColor: widget.bodyStyle.background,
-      resizeToAvoidBottomInset: false,
     );
   }
 
