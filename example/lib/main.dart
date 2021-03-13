@@ -135,7 +135,7 @@ class _AdvancedNavigationState extends State<AdvancedNavigation> {
           backgroundColor: Colors.red,
           onPressed: () => Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => NewHome()),
+            MaterialPageRoute(builder: (context) => TitleScrollScreen()),
           ),
         ),
         null,
@@ -153,49 +153,59 @@ class _AdvancedNavigationState extends State<AdvancedNavigation> {
   }
 }
 
-class NewHome extends StatelessWidget {
-  const NewHome({Key key}) : super(key: key);
+class TitleScrollScreen extends StatefulWidget {
+  TitleScrollScreen({Key key}) : super(key: key);
+
+  @override
+  _TitleScrollScreenState createState() => _TitleScrollScreenState();
+}
+
+class _TitleScrollScreenState extends State<TitleScrollScreen> {
+  final ScrollController controller = ScrollController();
 
   @override
   Widget build(BuildContext context) {
-    final ScrollController controller = ScrollController();
-
-    return Screen(
-      appBar: AppBarTitle(title: "Title Scroll"),
-      controllerToHideAppBar: controller,
-      body: TitleScrollNavigation(
-        barStyle: TitleNavigationBarStyle(
-          style: TextStyle(fontWeight: FontWeight.bold),
-          padding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0),
-          spaceBetween: 40,
-        ),
-        titles: [
-          "Main Page",
-          "Personal Information",
-          "Personalization",
-          "Security",
-          "Payment Methods",
-        ],
-        pages: [
-          ListView.builder(
-            itemCount: 15,
-            controller: controller,
-            padding: EdgeInsets.zero,
-            itemBuilder: (_, __) {
-              return Padding(
-                padding: EdgeInsets.only(bottom: 10),
-                child: Container(
-                  height: 50,
-                  color: Colors.blue[50],
-                ),
-              );
-            },
+    return Container(
+      color: Colors.white,
+      child: SafeArea(
+        child: Screen(
+          appBar: AppBarTitle(title: "Title Scroll", showBack: true),
+          controllerToHideAppBar: controller,
+          body: TitleScrollNavigation(
+            barStyle: TitleNavigationBarStyle(
+              style: TextStyle(fontWeight: FontWeight.bold),
+              padding: EdgeInsets.symmetric(horizontal: 40.0, vertical: 20.0),
+              spaceBetween: 40,
+            ),
+            titles: [
+              "Main Page",
+              "Personal Information",
+              "Personalization",
+              "Security",
+              "Payment Methods",
+            ],
+            pages: [
+              ListView.builder(
+                itemCount: 30,
+                controller: controller,
+                padding: EdgeInsets.zero,
+                itemBuilder: (_, __) {
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 10),
+                    child: Container(
+                      height: 60,
+                      color: Colors.blue[50],
+                    ),
+                  );
+                },
+              ),
+              Container(color: Colors.red[50]),
+              Container(color: Colors.green[50]),
+              Container(color: Colors.purple[50]),
+              Container(color: Colors.yellow[50]),
+            ],
           ),
-          Container(color: Colors.red[50]),
-          Container(color: Colors.green[50]),
-          Container(color: Colors.purple[50]),
-          Container(color: Colors.yellow[50]),
-        ],
+        ),
       ),
     );
   }
@@ -205,9 +215,11 @@ class AppBarTitle extends StatelessWidget {
   const AppBarTitle({
     Key key,
     @required this.title,
+    this.showBack = false,
   }) : super(key: key);
 
   final String title;
+  final bool showBack;
 
   @override
   Widget build(BuildContext context) {
@@ -225,15 +237,24 @@ class AppBarTitle extends StatelessWidget {
         ],
       ),
       child: SafeArea(
-        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-          Text(
-            title.toUpperCase(),
-            style: TextStyle(
-              fontSize: 22,
-              color: Colors.grey,
-              fontWeight: FontWeight.bold,
-              wordSpacing: 1.5,
-              letterSpacing: 0.5,
+        child: Row(children: [
+          if (showBack) ...[
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Icon(Icons.arrow_back, color: Colors.grey),
+            ),
+            SizedBox(width: 20),
+          ],
+          Expanded(
+            child: Text(
+              title.toUpperCase(),
+              style: TextStyle(
+                fontSize: 22,
+                color: Colors.grey,
+                fontWeight: FontWeight.bold,
+                wordSpacing: 1.5,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
         ]),
