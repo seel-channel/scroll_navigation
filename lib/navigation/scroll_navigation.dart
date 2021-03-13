@@ -266,7 +266,7 @@ class ScrollNavigationState extends State<ScrollNavigation> {
                     _buildNavigation(_barStyle.elevation),
                   Expanded(
                     child: ClipRRect(
-                      borderRadius: _bodyStyle.borderRadius as BorderRadius?,
+                      borderRadius: _bodyStyle.borderRadius,
                       child: PageView(
                         physics: _bodyStyle.physics,
                         children: widget.pages,
