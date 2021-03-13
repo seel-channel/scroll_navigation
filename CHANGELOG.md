@@ -1,3 +1,7 @@
+## [1.3.1]
+
+- Screen improved
+
 ## [1.3.0]
 
 - Null Safety Migration
