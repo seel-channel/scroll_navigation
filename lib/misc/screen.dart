@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:helpers/helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -17,7 +18,7 @@ class ScreenReturnButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Navigator.pop(context),
+      onTap: context.goBack,
       child: Icon(Icons.arrow_back, color: color, size: size),
     );
   }
@@ -29,19 +30,14 @@ class Screen extends StatefulWidget {
   ///ScrollNavigation.
   Screen({
     Key? key,
+    this.appBar,
     this.body,
     this.floatingButton,
-    this.leftWidget,
-    this.title,
-    this.rightWidget,
-    this.showAppBar = true,
-    this.centerTitle = true,
-    this.backgroundColor = Colors.white,
     this.controllerToHideAppBar,
     this.offsetToHideAppBar = 80.0,
-    this.height = 84,
-    this.elevation = 3.0,
   }) : super(key: key);
+
+  final Widget? appBar;
 
   ///It is the body of the Scaffold, you can place any Widget.
   final Widget? body;
@@ -49,33 +45,6 @@ class Screen extends StatefulWidget {
   ///It is recommended to use the [pages ActionButtons] property of the Scroll Navigation.
   ///Otherwise, it works like the [floatingActionButton] of the Scaffold
   final Widget? floatingButton;
-
-  ///Appears to the left of the Appbar in the same position as the [returnButton].
-  ///If the returnButton is active, this Widget will be ignored.
-  final Widget? leftWidget;
-
-  ///It is the central widget of the Appbar, it is recommended to use for titles.
-  final Widget? title;
-
-  ///Appears to the right of the Appbar. You can put a [Row],
-  ///but the [MainAxisSize.min] property must be activated
-  final Widget? rightWidget;
-
-  ///Center the Title Widgets.
-  final bool centerTitle;
-
-  ///If active, it shows the appbar; otherwise it will not.
-  ///Ignoring the left widget, right widget, and title widget
-  final bool showAppBar;
-
-  ///Color that customizes the AppBar.
-  final Color backgroundColor;
-
-  ///It is used to give the AppBar height.
-  final double height;
-
-  ///Boxshadow Y-Offset. If 0 don't show the BoxShadow
-  final double elevation;
 
   ///This parameter is used to hide the appbar when scrolling vertically
   ///a listview or some other scrolling widget that accepts a ScrollController.
@@ -92,18 +61,28 @@ class Screen extends StatefulWidget {
 }
 
 class _ScreenState extends State<Screen> {
-  final ValueNotifier _height = ValueNotifier<double?>(0.0);
+  final ValueNotifier<double> _height = ValueNotifier<double>(0.0);
+  late double _appBarHeight = 1.0;
+  final GlobalKey _appBarKey = GlobalKey();
+
   ScrollController? _controller;
   double? _heightRef = 0, _offsetRef = 0;
-  bool _subiendo = false;
+  bool _upping = false;
 
   @override
   void initState() {
-    _height.value = widget.height;
-    _heightRef = _height.value;
     if (widget.controllerToHideAppBar != null) {
+      _heightRef = _height.value;
       _controller = widget.controllerToHideAppBar;
-      _controller!.addListener(changeAppBarHeight);
+      _controller!.addListener(_controllerListener);
+      Misc.onLayoutRendered(
+        () => setState(() {
+          final height = _appBarKey.height;
+          print(height);
+          _height.value = height;
+          _appBarHeight = height;
+        }),
+      );
     }
     super.initState();
   }
@@ -111,11 +90,12 @@ class _ScreenState extends State<Screen> {
   @override
   void dispose() {
     if (widget.controllerToHideAppBar != null)
-      _controller!.removeListener(changeAppBarHeight);
+      _controller!.removeListener(_controllerListener);
+    _height.dispose();
     super.dispose();
   }
 
-  void changeAppBarHeight() {
+  void _controllerListener() {
     ScrollDirection direction = _controller!.position.userScrollDirection;
     AxisDirection axisDirection = _controller!.position.axisDirection;
 
@@ -123,118 +103,59 @@ class _ScreenState extends State<Screen> {
         axisDirection == AxisDirection.down) {
       //Subiendo
       if (direction == ScrollDirection.forward) {
-        if (!_subiendo) setRefs();
-        setHeight(widget.height);
+        if (!_upping) setRefs();
+        _updateHeight(_appBarHeight);
       }
       //Bajando
       if (direction == ScrollDirection.reverse) {
-        if (_subiendo) setRefs();
-        setHeight(0);
+        if (_upping) setRefs();
+        _updateHeight(0);
       }
     }
   }
 
   void setRefs() {
     setState(() {
-      _subiendo = !_subiendo;
+      _upping = !_upping;
       _heightRef = _height.value;
       _offsetRef = _controller!.offset;
     });
   }
 
-  void setHeight(double toValue) {
-    double lerp = (_offsetRef! - _controller!.offset) / widget.offsetToHideAppBar;
+  void _updateHeight(double toValue) {
+    double lerp =
+        (_offsetRef! - _controller!.offset) / widget.offsetToHideAppBar;
     lerp = lerp.abs();
-    if (lerp <= 1.0) _height.value = lerpDouble(_heightRef, toValue, lerp);
+    if (lerp <= 1.0)
+      _height.value = lerpDouble(_heightRef, toValue, lerp) ?? 0.0;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.showAppBar ? appBar(context) as PreferredSizeWidget? : null,
-      body: widget.body,
+      body: Column(children: [
+        widget.controllerToHideAppBar != null
+            ? Column(mainAxisSize: MainAxisSize.min, children: [
+                ValueListenableBuilder(
+                  valueListenable: _height,
+                  builder: (_, double value, __) {
+                    return ClipRRect(
+                      child: Transform.translate(
+                        offset: Offset(0.0, (_appBarHeight - value) * -1),
+                        child: Container(
+                          key: _appBarKey,
+                          child: widget.appBar ?? SizedBox(),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ])
+            : widget.appBar ?? SizedBox(),
+        Expanded(child: widget.body ?? Container()),
+      ]),
       floatingActionButton: widget.floatingButton,
       resizeToAvoidBottomInset: false,
-    );
-  }
-
-  Widget appBar(BuildContext context) {
-    double paddingConst = MediaQuery.of(context).size.width * 0.05;
-    return AnimatedBuilder(
-        animation: _height,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: paddingConst),
-          child: widget.centerTitle
-              ? Stack(alignment: AlignmentDirectional.centerStart, children: [
-                  Center(child: widget.title),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: widget.leftWidget,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [Container(child: widget.rightWidget)],
-                  ),
-                ])
-              : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: widget.leftWidget == null
-                        ? null
-                        : Padding(
-                            padding: EdgeInsets.only(right: paddingConst),
-                            child: widget.leftWidget),
-                  ),
-                  Expanded(flex: 70, child: widget.title!),
-                  Align(
-                    alignment: AlignmentDirectional.centerEnd,
-                    child: widget.rightWidget == null
-                        ? null
-                        : Padding(
-                            padding: EdgeInsets.only(left: paddingConst),
-                            child: widget.rightWidget),
-                  ),
-                ]),
-        ),
-        builder: (_, child) {
-          return _preferredSafeArea(
-            elevation: widget.elevation,
-            backgroundColor: widget.backgroundColor,
-            height: _height.value,
-            child: Opacity(
-              opacity: Interval(
-                0.2,
-                1.0,
-                curve: Curves.ease,
-              ).transform(_height.value / widget.height),
-              child: child,
-            ),
-          );
-        });
-  }
-
-  PreferredSize _preferredSafeArea({
-    required Widget child,
-    Color backgroundColor = Colors.white,
-    double height = 84,
-    double elevation = 3,
-  }) {
-    return PreferredSize(
-      preferredSize: Size.fromHeight(height),
-      child: Container(
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: -3,
-              blurRadius: 2,
-              offset: Offset(0, elevation),
-            ),
-          ],
-        ),
-        child: SafeArea(child: child),
-      ),
     );
   }
 }
