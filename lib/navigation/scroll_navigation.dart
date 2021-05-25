@@ -135,8 +135,8 @@ class ScrollNavigationState extends State<ScrollNavigation> {
     Misc.onLayoutRendered(() => setState(() => _navSize =
         _barStyle.position == NavigationPosition.left ||
                 _barStyle.position == NavigationPosition.right
-            ? _navKey.width
-            : _navKey.height));
+            ? _navKey.width ?? 0.0
+            : _navKey.height ?? 0.0));
     super.initState();
   }
 

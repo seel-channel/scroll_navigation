@@ -1,3 +1,7 @@
+## [1.3.2]
+
+- Helpers incompatibilities fixed.
+
 ## [1.3.1]
 
 - Screen improved

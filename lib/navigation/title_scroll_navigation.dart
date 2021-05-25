@@ -134,7 +134,7 @@ class _TitleScrollNavigationState extends State<TitleScrollNavigation> {
   void _setTitlesWidth() {
     setState(() {
       for (int i = 0; i < _titlesProps.length; i++)
-        _titlesProps[i].width = _titlesProps[i].key.width;
+        _titlesProps[i].width = _titlesProps[i].key.width ?? 0;
 
       _identifier.width = _getTitleWidth(widget.initialPage);
       _identifier.position = _paddingLeft;

@@ -54,14 +54,15 @@ class _ScreenState extends State<Screen> {
       _heightRef = _height.value;
       _controller = widget.controllerToHideAppBar;
       _controller!.addListener(_controllerListener);
-      Misc.onLayoutRendered(
-        () => setState(() {
-          final height = _appBarKey.height;
-          _height.value = height;
-          _appBarHeight = height;
-          _heightRef = height;
-        }),
-      );
+      Misc.onLayoutRendered(() {
+        final height = _appBarKey.height;
+        if (height != null)
+          setState(() {
+            _height.value = height;
+            _appBarHeight = height;
+            _heightRef = height;
+          });
+      });
     }
     super.initState();
   }
